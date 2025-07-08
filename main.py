@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import logging
 from utils import *
 from my_langgraph_definition import building_pokemon_graph
-import uvicorn
+from fastapi.staticfiles import StaticFiles
 
 # --- Setup logging ---
 logging.basicConfig(
@@ -25,6 +25,8 @@ NEO4J_AUTH = init["secrets"]["NEO4J_AUTH"]
 pokemon_graph_agent = building_pokemon_graph(llm, vectorstore, driver, NEO4J_URI, NEO4J_AUTH)
 
 app = FastAPI(title="Pokémon LangGraph API")
+
+app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
 
 app.add_middleware(
     CORSMiddleware,
@@ -99,6 +101,6 @@ async def run_pokemon_query(request: QueryRequest):
             edges=[])
 
 
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8000))
-    uvicorn.run(app, host="0.0.0.0", port=port)
+# if __name__ == "__main__":
+#     port = int(os.environ.get("PORT", 8000))
+#     uvicorn.run(app, host="0.0.0.0", port=port)
