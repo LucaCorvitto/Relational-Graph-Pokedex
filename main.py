@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import logging
 from utils import *
 from my_langgraph_definition import building_pokemon_graph
+import uvicorn
 
 # --- Setup logging ---
 logging.basicConfig(
@@ -99,5 +100,5 @@ async def run_pokemon_query(request: QueryRequest):
 
 
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
