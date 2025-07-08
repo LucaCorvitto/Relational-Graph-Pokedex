@@ -2,12 +2,9 @@ langchain-openai
 uvicorn
 langchain-pinecone
 pinecone
-os
 neo4j
-typing
 langchain
 langgraph
 pydantic
 requests
-time
 fastapi
