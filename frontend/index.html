@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pokémon Assistant</title>
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- vis-network CDN -->
+  <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Relational Graph Pokédex</h1>
+      <div class="pokedex-top-bar">
+        <div class="circle-center"></div>
+      </div>
+    </header>
+
+    <form id="queryForm">
+      <input type="text" id="userQuery" placeholder="Ask me something about Pokémon..." required autocomplete="off" />
+      <button type="submit">Ask</button>
+    </form>
+
+    <div id="responseContainer">
+      <h2>Answer:</h2>
+      <p id="responseText"></p>
+
+      <h3>Result of the Search (if performed):</h3>
+      <div id="graphInfoTable"></div>
+
+      <h3>Graph Visualization:</h3>
+      <div id="graph-visualization" style="height: 600px;"></div>
+    </div>
+  </div>
+
+  <footer>
+    <p>Pokémon LangGraph Assistant &copy; 2025</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

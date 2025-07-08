@@ -1,0 +1,164 @@
+/* Font e reset base */
+body {
+  background: radial-gradient(circle at center, #1a1a1a 0%, #0d0d0d 100%);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding: 2rem;
+  color: #eee;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Contenitore principale: come il corpo di un Pokédex */
+.container {
+  max-width: 700px;
+  margin: auto;
+  background: linear-gradient(145deg, #aa0000, #5a0000);
+  border-radius: 18px;
+  padding: 2rem 2.5rem 3rem 2.5rem;
+  box-shadow:
+    0 0 12px 3px #ff4f4f, /* bagliore rosso */
+    inset 0 0 10px #330000;
+  border: 4px solid #330000;
+  position: relative;
+}
+
+/* Header con cerchio centrale come il bottone Pokédex */
+header {
+  text-align: center;
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+h1 {
+  color: #ffcc00; /* Giallo luminoso */
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-shadow: 0 0 8px #ffcc00cc;
+}
+
+/* Barra superiore con cerchio centrale (richiama il Pokédex) */
+.pokedex-top-bar {
+  width: 100%;
+  height: 20px;
+  background: linear-gradient(90deg, #cc0000, #7a0000);
+  border-radius: 12px 12px 0 0;
+  margin-top: 12px;
+  position: relative;
+}
+
+.circle-center {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 44px;
+  height: 44px;
+  background: radial-gradient(circle at center, #e0f7ff 0%, #0059b3 90%);
+  border: 4px solid #003366;
+  border-radius: 50%;
+  box-shadow:
+    0 0 6px 2px #4db8ff,
+    inset 0 0 12px 2px #99d6ff;
+}
+
+/* Form */
+form {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.8rem;
+}
+
+input[type="text"] {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  font-size: 1.1rem;
+  border-radius: 14px;
+  border: 2px solid #003366;
+  background-color: #001a33;
+  color: #ccddff;
+  box-shadow:
+    inset 0 0 6px #004080;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+input[type="text"]:focus {
+  border-color: #66ccff;
+  box-shadow:
+    0 0 12px #66ccff,
+    inset 0 0 12px #3399ff;
+  outline: none;
+}
+
+button {
+  background-color: #0059b3;
+  color: #e0f7ff;
+  border: none;
+  padding: 0.75rem 1.6rem;
+  font-size: 1.1rem;
+  border-radius: 14px;
+  cursor: pointer;
+  box-shadow: 0 0 8px #3399ff;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+button:hover {
+  background-color: #003366;
+  box-shadow: 0 0 14px #66ccff;
+}
+
+/* Response container */
+#responseContainer {
+  margin-top: 2rem;
+  background: #001a33;
+  padding: 1.2rem 1.5rem;
+  border-radius: 14px;
+  border: 2px solid #003366;
+  box-shadow: inset 0 0 8px #004080;
+  color: #bbdfff;
+}
+
+/* Intestazioni interne */
+#responseContainer h2, 
+#responseContainer h3 {
+  color: #66ccff;
+  text-shadow: 0 0 6px #3399ff;
+}
+
+/* Grafico vis-network */
+#graph-visualization {
+  border: none;
+  border-radius: 14px;
+  box-shadow:
+    0 0 12px #3399ff;
+}
+
+/* Footer semplice */
+footer {
+  margin-top: 3rem;
+  text-align: center;
+  color: #444;
+  font-size: 0.9rem;
+  user-select: none;
+}
+
+.pokedex-th {
+  background-color: #003366 !important;
+  color: #ccddff;
+  padding: 0.5rem 1rem;
+  border-bottom: 2px solid #3399ff;
+  font-weight: bold; 
+}
+
+/* Tabelle info grafo */
+#graphInfoTable {
+  color: #ddf4ff;
+  font-family: monospace;
+}
+
+#graphInfoTable td {
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid #004080;
+}
