@@ -15,7 +15,7 @@ body {
   margin: auto;
   background: linear-gradient(145deg, #aa0000, #5a0000);
   border-radius: 18px;
-  padding: 2rem 2.5rem 3rem 2.5rem;
+  padding: 1rem 1.5rem 2rem 1.5rem;
   box-shadow:
     0 0 12px 3px #ff4f4f, /* bagliore rosso */
     inset 0 0 10px #330000;
@@ -161,4 +161,14 @@ footer {
 #graphInfoTable td {
   padding: 0.5rem 1rem;
   border-bottom: 1px solid #004080;
+}
+
+@media (max-width: 600px) {
+  form {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  button {
+    width: 100%;
+  }
 }

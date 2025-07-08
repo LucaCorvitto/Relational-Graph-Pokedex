@@ -43,7 +43,6 @@ document.getElementById('queryForm').addEventListener('submit', async (e) => {
 function drawGraph(nodes, edges) {
   const container = document.getElementById('graph-visualization');
 
-  // ⚠️ vis-network vuole "from" e "to", NON "from_"
   const correctedEdges = edges.map(e => ({
     from: e.from,
     to: e.to,
@@ -69,9 +68,11 @@ function drawGraph(nodes, edges) {
       shape: 'dot',
       size: 15,
       font: {
-        size: 14,
-        color: '#000'
+        size: 15,
+        color: '#ffffff'
       },
+      labelHighlightBold: true,
+      chosen: { node: true, label: true }
     },
     physics: {
       stabilization: false,
