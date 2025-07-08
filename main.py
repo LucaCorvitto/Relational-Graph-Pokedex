@@ -26,8 +26,6 @@ pokemon_graph_agent = building_pokemon_graph(llm, vectorstore, driver, NEO4J_URI
 
 app = FastAPI(title="Pokémon LangGraph API")
 
-app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -100,7 +98,7 @@ async def run_pokemon_query(request: QueryRequest):
             nodes=[],
             edges=[])
 
-
+app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
 # if __name__ == "__main__":
 #     port = int(os.environ.get("PORT", 8000))
 #     uvicorn.run(app, host="0.0.0.0", port=port)
