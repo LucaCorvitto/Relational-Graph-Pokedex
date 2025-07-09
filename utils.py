@@ -36,7 +36,7 @@ def initialization():
             time.sleep(1)
     index = pc.Index(INDEX_NAME)
     
-    llm = ChatOpenAI(model="gpt-4", temperature=0)
+    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
     vectorstore = PineconeVectorStore(index=index, embedding=embed_model)
     driver = GraphDatabase.driver(NEO4J_URI, auth=NEO4J_AUTH)
 
