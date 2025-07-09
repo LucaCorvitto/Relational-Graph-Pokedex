@@ -6,6 +6,12 @@ import logging
 from utils import *
 from my_langgraph_definition import building_pokemon_graph
 from fastapi.staticfiles import StaticFiles
+import uvicorn
+
+# decommenta per debug / commenta per produzione
+# global DEBUG
+# DEBUG=True
+DEBUG=False # commenta per debug
 
 # --- Setup logging ---
 logging.basicConfig(
@@ -15,7 +21,7 @@ logging.basicConfig(
 )
 
 # --- Init ---
-init = initialization()
+init = initialization(debug=DEBUG)
 llm = init["llm"]
 vectorstore = init["vectorstore"]
 driver = init["driver"]
@@ -99,6 +105,8 @@ async def run_pokemon_query(request: QueryRequest):
             edges=[])
 
 app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
+
+# decommenta per debug / commenta per produzione
 # if __name__ == "__main__":
 #     port = int(os.environ.get("PORT", 8000))
 #     uvicorn.run(app, host="0.0.0.0", port=port)

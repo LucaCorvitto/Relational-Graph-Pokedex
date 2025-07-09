@@ -7,24 +7,26 @@ import time
 from neo4j import GraphDatabase
 from neo4j.exceptions import SessionExpired, ServiceUnavailable, TransientError
 
-def initialization():
+def initialization(debug=False):
+    if debug:
     # SECRETS
-    # with open("secrets.yaml","r") as s:
-    #     secrets = yaml.safe_load(s)
+        with open("secrets.yaml","r") as s:
+            secrets = yaml.safe_load(s)
 
-    # OPENAI_API_KEY = secrets["OPENAI_API_KEY"]
-    # PINECONE_API_KEY = secrets["PINECONE_API_KEY"]
-    # INDEX_NAME = secrets["INDEX_NAME"]
-    # NEO4J_URI = secrets["NEO4J_URI"]
-    # NEO4J_AUTH = (secrets["NEO4J_USER"], secrets["NEO4J_PASSWORD"])
-    # NEO4J_DB = secrets["DATABASE"]
+        OPENAI_API_KEY = secrets["OPENAI_API_KEY"]
+        PINECONE_API_KEY = secrets["PINECONE_API_KEY"]
+        INDEX_NAME = secrets["INDEX_NAME"]
+        NEO4J_URI = secrets["NEO4J_URI"]
+        NEO4J_AUTH = (secrets["NEO4J_USER"], secrets["NEO4J_PASSWORD"])
+        NEO4J_DB = secrets["DATABASE"]
 
-    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-    PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
-    INDEX_NAME = os.getenv("INDEX_NAME")
-    NEO4J_URI = os.getenv("NEO4J_URI")
-    NEO4J_AUTH = (os.getenv("NEO4J_USER"), os.getenv("NEO4J_PASSWORD"))
-    NEO4J_DB = os.getenv("DATABASE")
+    else:
+        OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+        PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
+        INDEX_NAME = os.getenv("INDEX_NAME")
+        NEO4J_URI = os.getenv("NEO4J_URI")
+        NEO4J_AUTH = (os.getenv("NEO4J_USER"), os.getenv("NEO4J_PASSWORD"))
+        NEO4J_DB = os.getenv("DATABASE")
 
     embed_model = OpenAIEmbeddings(model="text-embedding-3-small", openai_api_key=OPENAI_API_KEY)
     pc = Pinecone(api_key=PINECONE_API_KEY)
