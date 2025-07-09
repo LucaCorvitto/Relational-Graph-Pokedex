@@ -7,4 +7,5 @@
 /pokemon_parser.py
 /README.md
 /requests.log
-/__pycache__
+/__pycache__/*
+/.venv
