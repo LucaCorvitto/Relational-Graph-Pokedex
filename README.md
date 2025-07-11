@@ -27,19 +27,37 @@ Still limited to the first generation and on the current relationships:
 
 ## TODO
 ### Features
-* Update the Knowledge Graph adding new relationships and using more specific ones, like `BELONGS_TO_GEN`; add labels to generic relationships, like:
-* * `CREATE (p1)-[:SHARE_TYPE {type: "Electric"}]->(p2)` and then return the label from the call `MATCH (p1)-[r:SHARE_TYPE]->(p2)
+* Update the Knowledge Graph adding new relationships and using more specific ones, like:
+  * `BELONGS_TO_GEN`
+  * `WEAK_TO`
+  * `RESISTENT_TO`
+  * `IMMUNE_TO`
+* and add labels to generic relationships, like:
+`CREATE (p1)-[:SHARE_TYPE {type: "Electric"}]->(p2)` and then return the label from the call
+
+```
+MATCH (p1)-[r:SHARE_TYPE]->(p2)
 RETURN p1.name AS from, p2.name AS to, r.type AS label
-`. This can make easier to search for specific type sharing: `MATCH (p1:Pokemon)-[r:SHARE_TYPE]->(p2:Pokemon)
+```
+
+This can make easier to search for specific type sharing:
+
+```
+MATCH (p1:Pokemon)-[r:SHARE_TYPE]->(p2:Pokemon)
 WHERE r.types = ["Electric"]
 RETURN p1.name, p2.name
-`
+```
+* Update the DataBase enhancing the information extraction from the websites including also:
+  * Pokedex entry relative to their generation (or every gen)
+  * General information (height, weight, etc)
+  * Game Stats (Atk, Def, SpAtk, SpDef...)
+  * Game locations (idk)
 * Add Graph Visualization for every request, update and create new graph building functions
 * Extract information directly from the query, to understand what the user is asking and plot the right graph (Take pokemon names, types, relationships etc)
 * Extract information from the rag output, building a graph in any case
 * Change the workflow of the application, from deciding if perform rag or cypher rag to perform both with graph traversal
 ### UI
 * Update the UI and UX, from just a pokedex to a richer interface, IDEAS:
-* * Keep the pokedex on the side (right or left) and let visualize the images of the output pokemon instead of the graph in it, on the other side let's visualize different graphs highlighting different relationships between the search pokemon. We can make a single pokedex but that can be opened up, it's close in the mobile version and open in the desktop one
-* * Reject the standard pokedex idea and make a UI that is wider and chat-simile but still resembles a pokedex (e.g. the Loveable one), add then graph visualizer on the side if requests. 
+  * Keep the pokedex on the side (right or left) and let visualize the images of the output pokemon instead of the graph in it, on the other side let's visualize different graphs highlighting different relationships between the search pokemon. We can make a single pokedex but that can be opened up, it's close in the mobile version and open in the desktop one
+  * Reject the standard pokedex idea and make a UI that is wider and chat-simile but still resembles a pokedex (e.g. the Loveable one), add then graph visualizer on the side if requests. 
 
