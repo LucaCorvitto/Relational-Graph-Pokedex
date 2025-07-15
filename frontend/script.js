@@ -16,7 +16,7 @@ document.getElementById('queryForm').addEventListener('submit', async (e) => {
 
   try {
     // 1) POST /query per ottenere la risposta testuale
-    const res = await fetch('/query', {
+    const res = await fetch(`${API_BASE}/query`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query })
