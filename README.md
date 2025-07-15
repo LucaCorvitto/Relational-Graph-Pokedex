@@ -5,7 +5,7 @@ It's a work in progress, so everything can change, from the UI to the core featu
 ## Current Features
 * **RAG Search**: ask about your favorite pokemon and see what information are registered in our Pokedex!
 * **Knowledge Graph Search**: ask about specific information regardin specific pokemons, types or generation and let our Pokedex search the right information and relations for you! It could be a mere number or an entire graph!
-* **Graph Visualization**: Wheter your question regards some relationships between pokemon, take a look at how different pokemon are related based on evolutions, type or generations! You can even touch the pokemon (nodes) you are interested in and highlight their relationships.
+* **Graph Visualization**: Whether your question regards some relationships between pokemon, take a look at how different pokemon are related based on evolutions, type or generations! You can even touch the pokemon (nodes) you are interested in and highlight their relationships.
 
 ## DEMO
 Working on a video demonstration of the current features of the app.
@@ -59,5 +59,5 @@ RETURN p1.name, p2.name
 ### UI
 * Update the UI and UX, from just a pokedex to a richer interface, IDEAS:
   * Keep the pokedex on the side (right or left) and let visualize the images of the output pokemon instead of the graph in it, on the other side let's visualize different graphs highlighting different relationships between the search pokemon. We can make a single pokedex but that can be opened up, it's close in the mobile version and open in the desktop one
-  * Reject the standard pokedex idea and make a UI that is wider and chat-simile but still resembles a pokedex (e.g. the Loveable one), add then graph visualizer on the side if requests. 
+  * Reject the standard pokedex idea and make a UI that is wider and chat-simile but still resembles a pokedex, add then graph visualizer on the side if requests. 
 
