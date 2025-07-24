@@ -91,9 +91,12 @@ class Pokedex(ft.Container):
             width=80 * self.dimensions,
             height=50 * self.dimensions,
         )
+
+        self.focus_getter = ft.TextField(opacity= 0, height= 1, width=1)
+
         self.arrow_up = ft.Container(self.arrow, on_click=self.get_pokemon)
         self.arrow_down = ft.Container(self.arrow, rotate=ft.Rotate(angle=3.14159), on_click=self.get_pokemon)
-        self.arrows = ft.Column([self.arrow_up, self.arrow_down], horizontal_alignment= ft.CrossAxisAlignment.CENTER)
+        self.arrows = ft.Column([self.arrow_up, self.focus_getter, self.arrow_down], horizontal_alignment= ft.CrossAxisAlignment.CENTER)
 
         self.text = ft.Text(
             value="...",
@@ -146,6 +149,9 @@ class Pokedex(ft.Container):
                 self.selected_pokemon += 1
             else:
                 self.selected_pokemon -= 1
+
+        self.focus_getter.focus()
+                
         numero = (self.selected_pokemon%150)+1
         resultado = await self.request(f"https://pokeapi.co/api/v2/pokemon/{numero}")
 
@@ -170,9 +176,7 @@ class Pokedex(ft.Container):
             self.update()    
     
     async def on_key(self, e: ft.KeyboardEvent):
-        print("calling on_key")
         if e.key == "Arrow Up":
-            print("calling arrow up")
             await self.get_pokemon(up= True)
         elif e.key == "Arrow Down":
             await self.get_pokemon(up= False)
