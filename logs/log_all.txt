@@ -1,12 +1,44 @@
-[DEBUG] [2025-07-24 11:23:58]
-Received query: What is a pokemon?
+[DEBUG] [2025-07-24 17:40:26]
+Received query: What are the ghost type pokemon?
 
-[DEBUG] [2025-07-24 11:24:03]
-Response: A Pokémon, short for "Pocket Monster," is a fictional creature that trainers can catch, train, and battle in the Pokémon franchise, which includes video games, trading card games, animated series, movies, and more. Each Pokémon has its own unique traits, types, abilities, and evolutionary paths. They can be categorized into various types, such as Normal, Electric, Psychic, Ghost, and Poison, among others. Pokémon can evolve into more powerful forms, learn various moves, and interact with their environment and other Pokémon in diverse ways. The franchise emphasizes themes of friendship, adventure, and competition, as trainers strive to become Pokémon Masters by capturing and training a diverse team of Pokémon.
+[ERROR] [2025-07-24 17:40:39]
+Error during processing query 'What are the ghost type pokemon?': 'charmap' codec can't encode characters in position 101-103: character maps to <undefined>
 
-[DEBUG] [2025-07-24 11:24:03]
+[DEBUG] [2025-07-24 17:41:10]
+Received query: hello bro
+
+[DEBUG] [2025-07-24 17:41:13]
+Response: Hello! How can I assist you today? If you have any questions about Pokémon or need information, feel free to ask!
+
+[DEBUG] [2025-07-24 17:41:13]
 nodes: []
 
-[DEBUG] [2025-07-24 11:24:03]
+[DEBUG] [2025-07-24 17:41:13]
 edges: []
+
+[DEBUG] [2025-07-24 17:41:27]
+Received query: tell me which pokemon is ghost type
+
+[DEBUG] [2025-07-24 17:41:32]
+Response: The Pokémon that is a Ghost type include:
+
+1. **Gastly** - A dual-type Ghost/Poison Pokémon introduced in Generation I. It evolves into Haunter starting at level 25.
+
+2. **Haunter** - Also a dual-type Ghost/Poison Pokémon introduced in Generation I. It evolves from Gastly starting at level 25 and evolves into Gengar when traded or when exposed to a Linking Cord.
+
+3. **Gengar** - A dual-type Ghost/Poison Pokémon introduced in Generation I. It evolves from Haunter when traded or when exposed to a Linking Cord. Gengar has two forms: Mega Gengar and Gigantamax Gengar.
+
+These Pokémon are known for their ghostly characteristics and abilities related to the Ghost type.
+
+[DEBUG] [2025-07-24 17:41:32]
+nodes: []
+
+[DEBUG] [2025-07-24 17:41:32]
+edges: []
+
+[DEBUG] [2025-07-24 17:42:12]
+Received query: list me all that share both water and ice type
+
+[ERROR] [2025-07-24 17:42:15]
+Error during processing query 'list me all that share both water and ice type': Cannot resolve address ae09a0d2.databases.neo4j.io:7687
 
