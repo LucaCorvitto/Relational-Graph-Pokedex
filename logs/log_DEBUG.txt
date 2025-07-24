@@ -1,0 +1,4 @@
+[DEBUG] [2025-07-24 11:23:58]Received query: What is a pokemon?
+[DEBUG] [2025-07-24 11:24:03]Response: A Pokémon, short for "Pocket Monster," is a fictional creature that trainers can catch, train, and battle in the Pokémon franchise, which includes video games, trading card games, animated series, movies, and more. Each Pokémon has its own unique traits, types, abilities, and evolutionary paths. They can be categorized into various types, such as Normal, Electric, Psychic, Ghost, and Poison, among others. Pokémon can evolve into more powerful forms, learn various moves, and interact with their environment and other Pokémon in diverse ways. The franchise emphasizes themes of friendship, adventure, and competition, as trainers strive to become Pokémon Masters by capturing and training a diverse team of Pokémon.
+[DEBUG] [2025-07-24 11:24:03]nodes: []
+[DEBUG] [2025-07-24 11:24:03]edges: []

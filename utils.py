@@ -28,7 +28,7 @@ def initialization(debug=False):
         NEO4J_AUTH = (os.getenv("NEO4J_USER"), os.getenv("NEO4J_PASSWORD"))
         NEO4J_DB = os.getenv("DATABASE")
 
-    embed_model = OpenAIEmbeddings(model="text-embedding-3-small", openai_api_key=OPENAI_API_KEY)
+    embed_model = OpenAIEmbeddings(model="text-embedding-3-small", api_key= OPENAI_API_KEY)
     pc = Pinecone(api_key=PINECONE_API_KEY)
     spec = ServerlessSpec(cloud="aws", region="us-east-1")
 
@@ -38,7 +38,7 @@ def initialization(debug=False):
             time.sleep(1)
     index = pc.Index(INDEX_NAME)
     
-    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key=OPENAI_API_KEY)
     vectorstore = PineconeVectorStore(index=index, embedding=embed_model)
     driver = GraphDatabase.driver(NEO4J_URI, auth=NEO4J_AUTH)
 

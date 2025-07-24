@@ -69,8 +69,8 @@ async def run_pokemon_query(request: QueryRequest):
         #app.state.last_graph_info = graph_info
 
         nodes, edges = get_graph_by_type(driver, graph_info)
-        print("nodes:", nodes)
-        print("edges:", edges)
+        DEBUG_log("nodes:", nodes)
+        DEBUG_log("edges:", edges)
 
         return QueryResponse(
             response=response_text,
@@ -87,6 +87,12 @@ async def run_pokemon_query(request: QueryRequest):
             nodes=[],
             edges=[])
 
+async def create_query(e: ft.ControlEvent):
+    query = e.control.value
+    if query:
+        response = await(run_pokemon_query(QueryRequest(query=query)))
+        # Add nodes and edges to the page or handle them as needed
+
 def main(page: ft.Page):
     page.title = "Pokédex Graph"
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
@@ -94,6 +100,7 @@ def main(page: ft.Page):
 
     # Add your Flet UI components here
     page.add(ft.Text("Welcome to the Pokédex Graph!"))
+    page.add(ft.TextField(label="Enter your query", on_submit=create_query))
 
 # decommenta per debug / commenta per produzione
 if __name__ == "__main__":
