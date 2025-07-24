@@ -8,10 +8,8 @@ from my_langgraph_definition import building_pokemon_graph
 from fastapi.staticfiles import StaticFiles
 import uvicorn
 
-# decommenta per debug / commenta per produzione
-# global DEBUG
-# DEBUG=True
-DEBUG=False # commenta per debug
+DEBUG=False
+# DEBUG=True            # decommenta per debug / commenta per produzione
 
 # --- Setup logging ---
 logging.basicConfig(
