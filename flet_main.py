@@ -1,21 +1,18 @@
-from fastapi import FastAPI
 from typing import List, Optional, Dict, Union
 from pydantic import BaseModel, Field
-from fastapi.middleware.cors import CORSMiddleware
-import logging
 from utils import *
 from my_langgraph_definition import building_pokemon_graph
-from fastapi.staticfiles import StaticFiles
-import uvicorn
+from Custom_log import init_log, log, DEBUG_log
+import flet as ft
 
 DEBUG=False
 DEBUG=True            # decommenta per debug / commenta per produzione
 
 # --- Setup logging ---
-logging.basicConfig(
-    filename="requests.log",
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s"
+init_log(
+    base_dir= "logs",
+    print_debug= True if DEBUG else False,
+    print_inputs= True if DEBUG else False
 )
 
 # --- Init ---
@@ -27,16 +24,6 @@ NEO4J_URI = init["secrets"]["NEO4J_URI"]
 NEO4J_AUTH = init["secrets"]["NEO4J_AUTH"]
 
 pokemon_graph_agent = building_pokemon_graph(llm, vectorstore, driver, NEO4J_URI, NEO4J_AUTH)
-
-app = FastAPI(title="Pokémon LangGraph API")
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 # --- Models ---
 class Node(BaseModel):
@@ -63,10 +50,8 @@ class QueryResponse(BaseModel):
     nodes: List[Node]
     edges: List[Edge]
 
-
-@app.post("/query", response_model=QueryResponse)
 async def run_pokemon_query(request: QueryRequest):
-    logging.info(f"Received query: {request.query}")
+    DEBUG_log(f"Received query: {request.query}")
 
     initial_input = {"query": request.query}
     thread = {"configurable": {"thread_id": "42"}}
@@ -76,9 +61,9 @@ async def run_pokemon_query(request: QueryRequest):
         response_text = final_state.get("response", "")
         graph_info = final_state.get("graph_info", [])
 
-        logging.info(f"Response: {response_text}")
+        DEBUG_log(f"Response: {response_text}")
         if graph_info:
-            logging.info(f"Graph info: {graph_info}")
+            DEBUG_log(f"Graph info: {graph_info}")
 
         # Salva la graph_info per il GET
         #app.state.last_graph_info = graph_info
@@ -95,16 +80,21 @@ async def run_pokemon_query(request: QueryRequest):
         )
 
     except Exception as e:
-        logging.error(f"Error during processing query '{request.query}': {e}", exc_info=True)
+        DEBUG_log(f"Error during processing query '{request.query}': {e}", level="ERROR")
         return QueryResponse(
             response="Errore interno del server",
             graph_info=[],
             nodes=[],
             edges=[])
 
-app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
+def main(page: ft.Page):
+    page.title = "Pokédex Graph"
+    page.vertical_alignment = ft.MainAxisAlignment.CENTER
+    page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+
+    # Add your Flet UI components here
+    page.add(ft.Text("Welcome to the Pokédex Graph!"))
 
 # decommenta per debug / commenta per produzione
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8000))
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    ft.app(target=main)
