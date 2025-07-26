@@ -9,3 +9,5 @@
 /__pycache__/*
 /.venv
 /logs/*
+/FLET_UI/__pycache__
+/FLET_UI/Custom_elements/__pycache__

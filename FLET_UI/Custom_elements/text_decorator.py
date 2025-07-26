@@ -1,9 +1,6 @@
 from typing import Optional
 from flet import (Container, Text, Colors, BoxShadow)
 
-from Flet_UI.utilities.translator import Translator, translate_fields
-
-@translate_fields("text", active_string_search=False)
 class Text_decorator(Container):
     def __init__(
             self,
@@ -11,9 +8,8 @@ class Text_decorator(Container):
             text_color = Colors.BLACK,
             bg_color = Colors.WHITE,
             size: int = 13,
-            on_click = None,
-            expand : bool = None,
-            translator: Optional[Translator] = None
+            on_click : Optional[callable] = None,
+            expand : Optional [int | bool] = None,
         ) -> None:
 
         super().__init__(expand= expand)
