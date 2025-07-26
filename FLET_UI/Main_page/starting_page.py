@@ -36,7 +36,8 @@ class starting_page(ft.Container):
             hint_text= "Insert here your query",
             multiline= True,
             bgcolor= "grey",
-            expand_loose= True
+            expand_loose= True,
+            suffix= ft.IconButton(ft.Icons.SEND, on_click=self.send_query),
         )
 
         self.upper_view = ft.Column(
@@ -55,6 +56,10 @@ class starting_page(ft.Container):
         )
 
         self.content = ft.Column([self.upper_view, self.description_box], expand= True, horizontal_alignment= ft.CrossAxisAlignment.STRETCH)
+
+    def send_query(self, e:ft.ControlEvent):
+        query = self.input_box.value
+        print(query)
 
 if __name__ == "__main__":
     def main(page: ft.Page):
