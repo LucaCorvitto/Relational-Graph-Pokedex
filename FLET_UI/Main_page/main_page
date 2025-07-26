@@ -1,0 +1,19 @@
+import flet as ft
+from FLET_UI.Custom_elements.text_decorator import Text_decorator
+
+class main_page(ft.Container):
+    def __init__(self):
+        """
+        The main_page is going to be a very siplified view of the pokedex with a simple textfield and description of the website functionalities
+        """
+        super().__init__(
+            expand= True,
+            bgcolor= "red"
+        )
+    
+        self.title = Text_decorator("This is Pokemon Relatonal Graph")
+
+        self.input_box = ft.TextField(
+            hint_text= "Insert here your query",
+            multiline= True
+        )

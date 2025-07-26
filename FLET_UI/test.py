@@ -5,19 +5,33 @@ import aiohttp
 import flet.canvas as cv
 
 class Pokedex(ft.Container):
+
     def __init__(self, dimensions : float = 1.0):
-        super().__init__(
-            expand=True,
-            bgcolor=ft.Colors.RED,
-            alignment=ft.alignment.top_center,
-        )
+        
         """
         The minimum dimensions value without breaking it is 0.25
         """
 
+        super().__init__(
+            expand=True,
+            bgcolor=ft.Colors.RED,
+            alignment=ft.alignment.top_center,
+            border_radius= 50*dimensions,
+            width=800 * dimensions,
+            height = 1200 * dimensions,
+            border= ft.Border(
+                top= ft.BorderSide(
+                    width= dimensions*10,
+                    color= "black"
+                ),
+                left=ft.BorderSide(
+                    width= dimensions*10,
+                    color= "black"
+                ),
+            )
+        )
+
         self.dimensions = dimensions
-        self.width = 800 * dimensions
-        self.height = 1200 * dimensions
 
         self.selected_pokemon = 149
 
