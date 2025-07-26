@@ -1,4 +1,4 @@
-from langchain_ollama import OllamaEmbeddings, ChatOllama
+from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_pinecone import PineconeVectorStore
 from pinecone import Pinecone, ServerlessSpec
 import yaml
@@ -7,12 +7,13 @@ import time
 from neo4j import GraphDatabase
 from neo4j.exceptions import SessionExpired, ServiceUnavailable, TransientError
 
-def initialization(debug=False, gen_model="gemma3:1b", code_model="gemma3:1b"):
+def initialization(debug=False):
     if debug:
     # SECRETS
         with open("secrets.yaml","r") as s:
             secrets = yaml.safe_load(s)
 
+        OPENAI_API_KEY = secrets["OPENAI_API_KEY"]
         PINECONE_API_KEY = secrets["PINECONE_API_KEY"]
         INDEX_NAME = secrets["INDEX_NAME"]
         NEO4J_URI = secrets["NEO4J_URI"]
@@ -20,13 +21,14 @@ def initialization(debug=False, gen_model="gemma3:1b", code_model="gemma3:1b"):
         NEO4J_DB = secrets["DATABASE"]
 
     else:
+        OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
         PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
         INDEX_NAME = os.getenv("INDEX_NAME")
         NEO4J_URI = os.getenv("NEO4J_URI")
         NEO4J_AUTH = (os.getenv("NEO4J_USER"), os.getenv("NEO4J_PASSWORD"))
         NEO4J_DB = os.getenv("DATABASE")
 
-    embed_model = OllamaEmbeddings(model="nomic-embed-text", base_url="http://127.0.0.1:11435")
+    embed_model = OpenAIEmbeddings(model="text-embedding-3-small", api_key= OPENAI_API_KEY)
     pc = Pinecone(api_key=PINECONE_API_KEY)
     spec = ServerlessSpec(cloud="aws", region="us-east-1")
 
@@ -36,13 +38,11 @@ def initialization(debug=False, gen_model="gemma3:1b", code_model="gemma3:1b"):
             time.sleep(1)
     index = pc.Index(INDEX_NAME)
     
-    llm = ChatOllama(model=gen_model, temperature=0, base_url="http://127.0.0.1:11435") #
-    code_llm = ChatOllama(model=code_model, temperature=0, base_url="http://127.0.0.1:11435")
+    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key=OPENAI_API_KEY)
     vectorstore = PineconeVectorStore(index=index, embedding=embed_model)
     driver = GraphDatabase.driver(NEO4J_URI, auth=NEO4J_AUTH)
 
     return {"llm":llm,
-            "code_llm":code_llm,
             "vectorstore":vectorstore,
             "driver":driver,
             "secrets":

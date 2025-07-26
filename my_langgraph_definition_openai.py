@@ -5,22 +5,8 @@ from langchain.schema import Document
 from neo4j.exceptions import SessionExpired, ServiceUnavailable, TransientError
 import time
 
-# while ($true) {
-#     Start-Process -FilePath "ollama" -ArgumentList "pull mistral:7b" -NoNewWindow -Wait
-#     Start-Sleep -Seconds 20
-# }
 
-# while ($true) {
-#     $process = Start-Process -FilePath "ollama" -ArgumentList "pull mistral:7b" -NoNewWindow -PassThru
-#     Start-Sleep -Seconds 20
-#     if (!$process.HasExited) {
-#         $process.Kill()
-#         Write-Host "Process killed after timeout"
-#     }
-# }
-
-
-def building_pokemon_graph(llm, code_llm, vectorstore, driver, NEO4J_URI, NEO4J_AUTH):
+def building_pokemon_graph(llm, vectorstore, driver, NEO4J_URI, NEO4J_AUTH):
 
     class RoutingOutput(BaseModel):
         route_to: Literal["rag", "cypher"] =  Field(..., description="Method of answering to use.")
@@ -119,7 +105,7 @@ def building_pokemon_graph(llm, code_llm, vectorstore, driver, NEO4J_URI, NEO4J_
     """
 #MATCH (bulba:Pokemon {name: "Bulbasaur"})-[:HAS_TYPE]->(type:Type) WITH bulba, collect(DISTINCT type) AS bulbaTypes MATCH (other:Pokemon)-[:HAS_TYPE]->(type2:Type) WITH bulba, bulbaTypes, other, collect(DISTINCT type2) AS otherTypes WHERE other <> bulba AND apoc.coll.toSet(bulbaTypes) = apoc.coll.toSet(otherTypes) RETURN other.name AS pokemon_with_same_types
         full_prompt = f"{system}\n\nUser question: {query}\nCypher query:"
-        output_format = code_llm.with_structured_output(CypherQueryOutput)
+        output_format = llm.with_structured_output(CypherQueryOutput)
         cypher = output_format.invoke(full_prompt)#.strip()
         return {"cypher_query": cypher.cypher_query}
 

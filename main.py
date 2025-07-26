@@ -10,6 +10,8 @@ import uvicorn
 
 DEBUG=False
 DEBUG=True            # decommenta per debug / commenta per produzione
+GEN_MODEL="mistral:7b"
+CODE_MODEL="qwen2.5-coder:7b"
 
 # --- Setup logging ---
 logging.basicConfig(
@@ -21,12 +23,13 @@ logging.basicConfig(
 # --- Init ---
 init = initialization(debug=DEBUG)
 llm = init["llm"]
+code_llm = init["code_llm"]
 vectorstore = init["vectorstore"]
 driver = init["driver"]
 NEO4J_URI = init["secrets"]["NEO4J_URI"]
 NEO4J_AUTH = init["secrets"]["NEO4J_AUTH"]
 
-pokemon_graph_agent = building_pokemon_graph(llm, vectorstore, driver, NEO4J_URI, NEO4J_AUTH)
+pokemon_graph_agent = building_pokemon_graph(llm, code_llm, vectorstore, driver, NEO4J_URI, NEO4J_AUTH)
 
 app = FastAPI(title="Pokémon LangGraph API")
 

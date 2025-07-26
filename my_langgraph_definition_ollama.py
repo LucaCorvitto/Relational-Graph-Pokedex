@@ -7,18 +7,8 @@ import time
 
 # while ($true) {
 #     Start-Process -FilePath "ollama" -ArgumentList "pull mistral:7b" -NoNewWindow -Wait
-#     Start-Sleep -Seconds 20
+#     Start-Sleep -Seconds 10
 # }
-
-# while ($true) {
-#     $process = Start-Process -FilePath "ollama" -ArgumentList "pull mistral:7b" -NoNewWindow -PassThru
-#     Start-Sleep -Seconds 20
-#     if (!$process.HasExited) {
-#         $process.Kill()
-#         Write-Host "Process killed after timeout"
-#     }
-# }
-
 
 def building_pokemon_graph(llm, code_llm, vectorstore, driver, NEO4J_URI, NEO4J_AUTH):
 

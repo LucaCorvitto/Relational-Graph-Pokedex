@@ -26,7 +26,25 @@ Still limited to the first generation and on the current relationships:
 
 
 ## TODO
+### Models
+Model to download and test:
+* general tasks
+  * ollama pull deepseek-r1:8b
+  * ollama pull gemma3n:e4b
+  * ollama pull gemma3:4b
+  * ollama pull llama3.1:8b
+  * ollama pull llama3.2:3b
+* coding
+  * ollama pull codellama:7b
+  * ollama pull qwen2.5-coder:7b
+  * ollama pull starcoder2:7b
+* tool use / rag
+  * ollama pull command-r7b
+  * ollama pull mistral:7b
+
 ### Features
+Follow the order of implementation, first enlarge the KG and then edit the langgraph process.
+#### Knowledge Graph
 * Update the Knowledge Graph adding new relationships and using more specific ones, like:
   * `BELONGS_TO_GEN`
   * `WEAK_TO`
@@ -52,6 +70,8 @@ RETURN p1.name, p2.name
   * General information (height, weight, etc)
   * Game Stats (Atk, Def, SpAtk, SpDef...)
   * Game locations (idk)
+#### LangGraph Process
+The following are edits that can be done at the same time, changing the flow of the app with rag-cypherRag-graphTraversal. The graphTraversal phase is done to enlarge the context, and can be exploited to retrieve more and tailored information for the graph visualization. Extracting info from the query could be interesting:
 * Add Graph Visualization for every request, update and create new graph building functions
 * Extract information directly from the query, to understand what the user is asking and plot the right graph (Take pokemon names, types, relationships etc)
 * Extract information from the rag output, building a graph in any case
