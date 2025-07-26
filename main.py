@@ -10,6 +10,7 @@ import uvicorn
 
 DEBUG=False
 DEBUG=True            # decommenta per debug / commenta per produzione
+API=False
 GEN_MODEL="mistral:7b"
 CODE_MODEL="qwen2.5-coder:7b"
 
@@ -21,7 +22,7 @@ logging.basicConfig(
 )
 
 # --- Init ---
-init = initialization(debug=DEBUG)
+init = initialization(debug=DEBUG, api=API)
 llm = init["llm"]
 code_llm = init["code_llm"]
 vectorstore = init["vectorstore"]
