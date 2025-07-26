@@ -10,9 +10,10 @@ class Text_decorator(Container):
             size: int = 13,
             on_click : Optional[callable] = None,
             expand : Optional [int | bool] = None,
+            expand_loose : Optional [bool] = None,
         ) -> None:
 
-        super().__init__(expand= expand)
+        super().__init__(expand= expand, expand_loose = expand_loose)
 
         self.text = text
         self.text_color = text_color
