@@ -1,6 +1,18 @@
+from typing import Optional
 import flet as ft
 import flet.canvas as cv
 
+import sys
+import os
+
+# Add the parent directory to sys.path
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+sys.path.insert(0, parent_dir)
+
+from FLET_UI.Custom_elements.text_decorator import Text_decorator
+from FLET_UI.Main_page.lighting_button import lighting_button
+
+#POKEDEX SHAPE------------------------------------------------------
 class PokedexTopShape(cv.Canvas):
     def __init__(self, color: ft.Colors = "blue", height : int = 90, shadow_offset: float = 5.0):
         super().__init__(expand=True)
@@ -68,15 +80,49 @@ class PokedexTopShape(cv.Canvas):
         self.draw_zigzag()
         self.page.on_resized = self.draw_zigzag  # Correct handler assignment
         self.page.update()
+#=============================================================================================
+
+class Top_navigation(ft.Container):
+    def  __init__(self):
+
+        self.light_buttons = ft.Row( [
+            lighting_button(50, "Blue", do_blink= True),
+            lighting_button(25, "red"),
+            lighting_button(25, "yellow"),
+            lighting_button(25, "green"),
+            ] )
+
+        super().__init__(
+            height=80,
+            bgcolor= ft.Colors.with_opacity(0, "black"),
+            padding= 10,
+            #border_radius= border_radius,
+            content= self.light_buttons,
+        )
+
+class TopNavigationPokedex(ft.Container):
+    """
+    Should be working ONLY if added to the page first
+    """
+    def  __init__(self, color : Optional[ft.Colors] = "red"):
+        super().__init__(content= ft.Text("This is TopNavigationPokedex placeholder"), height= 50)
+
+        self.structure = ft.Stack([
+            PokedexTopShape(color=color),
+            Top_navigation()
+        ])
+
+    def did_mount(self):
+        self.page.overlay.append(self.structure)
+        self.page.update()
+
+    def will_unmount(self):
+        self.page.overlay.remove(self.structure)
+        self.page.update()
+
 
 if __name__ == "__main__":
-
     def main(page: ft.Page):
-        page.bgcolor = ft.Colors.WHITE
-        page.horizontal_alignment = ft.CrossAxisAlignment.STRETCH
-        page.vertical_alignment = ft.MainAxisAlignment.START
+        page.add (TopNavigationPokedex())
 
-        zigzag_canvas = PokedexTopShape()
-        page.add(zigzag_canvas)
-
-    ft.app(main)
+    ft.app(target=main)

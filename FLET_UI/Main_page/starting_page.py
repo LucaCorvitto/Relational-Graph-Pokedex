@@ -1,3 +1,4 @@
+from typing import Optional
 import flet as ft
 
 import sys
@@ -9,26 +10,27 @@ sys.path.insert(0, parent_dir)
 
 from FLET_UI.Custom_elements.text_decorator import Text_decorator
 from FLET_UI.Main_page.lighting_button import lighting_button
+from FLET_UI.Main_page.Top_navigation import TopNavigationPokedex
 
-class starting_page(ft.Container):
-    def __init__(self):
+
+class Starting_page(ft.Container):
+    def __init__(self, on_submit_query: Optional[callable] = None):
         """
         The main_page is going to be a very siplified view of the pokedex with a simple textfield and description of the website functionalities
         """
+        border = ft.Border(bottom= ft.BorderSide(10, "grey"))
+        
         super().__init__(
             expand= True,
-            bgcolor= "red",
+            offset= ft.Offset(0,0),
+            animate_offset=ft.Animation(1000, ft.AnimationCurve.LINEAR),
+            bgcolor= ft.Colors.RED_400,
             padding= 30,
+            border_radius= 30,
+            border= border,
         )
 
-        self.light_buttons = ft.Row([
-            lighting_button(50, "Blue", do_blink= True),
-            lighting_button(25, "red"),
-            lighting_button(25, "yellow"),
-            lighting_button(25, "green"),
-            ],
-            expand_loose= True
-            )
+        self.on_submit_query :callable = on_submit_query
     
         self.title = Text_decorator("This is Pokemon Relational Graph", expand_loose= True)
 
@@ -41,7 +43,7 @@ class starting_page(ft.Container):
         )
 
         self.upper_view = ft.Column(
-            [self.light_buttons, self.title, ft.Divider(opacity=0), self.input_box],
+            [self.title, ft.Divider(opacity=0), self.input_box],
             horizontal_alignment= ft.CrossAxisAlignment.CENTER,
             expand_loose=True
         )
@@ -55,15 +57,28 @@ class starting_page(ft.Container):
             expand= True,
         )
 
-        self.content = ft.Column([self.upper_view, self.description_box], expand= True, horizontal_alignment= ft.CrossAxisAlignment.STRETCH)
+        self.content = ft.Column(
+                [self.upper_view, self.description_box],
+                expand= True,
+                horizontal_alignment= ft.CrossAxisAlignment.STRETCH
+            )
 
     def send_query(self, e:ft.ControlEvent):
         query = self.input_box.value
         print(query)
+        if self.on_submit_query:
+            self.on_submit_query(e)
+
+    def animate_out(self):
+        self.offset =  ft.Offset(0, -1.5)
+        self.update()
+        
 
 if __name__ == "__main__":
     def main(page: ft.Page):
-        page.add(starting_page())
+        start = Starting_page(on_submit_query= lambda _ : start.animate_out())
+        page.add(TopNavigationPokedex())
+        page.add(start)
 
-ft.app(target=main)
+    ft.app(target=main)
 
