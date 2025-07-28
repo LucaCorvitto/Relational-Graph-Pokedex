@@ -64,10 +64,11 @@ def building_pokemon_graph(llm, code_llm, vectorstore, driver, NEO4J_URI, NEO4J_
         #retrieving_method = llm.with_structured_output(RoutingOutput)
 
         #decision = retrieving_method.invoke(prompt)#.strip().lower()
-        decision = llm.invoke(prompt)#.strip().lower()
+        decision = llm.invoke(prompt)
         logging.info("decision: ", decision.content)
+        decision_content = decision.content.strip().lower()
         #return decision.route_to # {"routing": decision}
-        return decision.content # {"routing": decision}
+        return decision_content # {"routing": decision}
 
     # 2. Generic RAG
 

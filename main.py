@@ -28,6 +28,7 @@ vectorstore = init["vectorstore"]
 driver = init["driver"]
 NEO4J_URI = init["secrets"]["NEO4J_URI"]
 NEO4J_AUTH = init["secrets"]["NEO4J_AUTH"]
+pokemon_names = init["pokemon_names"]
 
 pokemon_graph_agent = building_pokemon_graph(llm, code_llm, vectorstore, driver, NEO4J_URI, NEO4J_AUTH)
 
@@ -86,7 +87,7 @@ async def run_pokemon_query(request: QueryRequest):
         # Salva la graph_info per il GET
         #app.state.last_graph_info = graph_info
 
-        nodes, edges = get_graph_by_type(driver, graph_info)
+        nodes, edges = get_graph_by_type(driver, graph_info, pokemon_names)
         print("nodes:", nodes)
         print("edges:", edges)
 

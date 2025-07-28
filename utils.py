@@ -9,6 +9,18 @@ import time
 from neo4j import GraphDatabase
 from neo4j.exceptions import SessionExpired, ServiceUnavailable, TransientError
 import logging
+import csv
+
+# use this to create an instance of all the pokemon names in the dataset to be used in other functions
+def extract_pokemon_names(csv_file_path):
+    pokemon_names = []
+    with open(csv_file_path, newline='', encoding='utf-8') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            name = row.get("name")
+            if name:
+                pokemon_names.append(name.strip())
+    return pokemon_names
 
 # --- Setup logging ---
 logging.basicConfig(
@@ -61,6 +73,8 @@ def initialization(debug=False, api=False, gen_model="gemma3:1b", code_model="ge
     vectorstore = PineconeVectorStore(index=index, embedding=embed_model)
     driver = GraphDatabase.driver(NEO4J_URI, auth=NEO4J_AUTH)
 
+    pokemon_names_list = extract_pokemon_names('data/pokemon_data.csv')
+
     return {"llm":llm,
             "code_llm":code_llm,
             "vectorstore":vectorstore,
@@ -70,7 +84,8 @@ def initialization(debug=False, api=False, gen_model="gemma3:1b", code_model="ge
                 "NEO4J_URI":NEO4J_URI,
                 "NEO4J_AUTH":NEO4J_AUTH,
                 "NEO4J_DB":NEO4J_DB
-                }
+                },
+            "pokemon_names":pokemon_names_list
             }
 
 def extract_cypher_query(text: str) -> str:
@@ -129,38 +144,37 @@ def extract_graph_from_neo4j(result):
     return list(nodes.values()), edges
 
 
-def get_type_graph(driver, graph_info, max_retries=3):
-    # Estraggo nomi tipi
-    list_of_types = [elem["t.name"] for elem in graph_info if "t.name" in elem]
+# def get_type_graph(driver, graph_info, max_retries=3):
+#     # Estraggo nomi tipi
+#     list_of_types = [elem["t.name"] for elem in graph_info if "t.name" in elem]
 
-    if not list_of_types:
-        return [], []
+#     if not list_of_types:
+#         return [], []
 
-    for attempt in range(max_retries):
-        try:
-            with driver.session() as session:
-                cypher = """
-                MATCH (t:Type)
-                WHERE t.name IN $names
-                WITH collect(t) AS ts
-                UNWIND ts AS t1
-                UNWIND ts AS t2
-                WITH t1, t2 WHERE elementId(t1) < elementId(t2)
-                MATCH path = allShortestPaths((t1)-[*..2]-(t2))
-                RETURN path
-                """
-                result = session.run(cypher, parameters={"names": list_of_types})
-                nodes, edges = extract_graph_from_neo4j(result)
-                return nodes, edges
-        except (SessionExpired, ServiceUnavailable, TransientError) as e:
-            print(f"Neo4j connection error: {e}. Retrying ({attempt+1}/{max_retries})...")
-            time.sleep(1 * (attempt+1))
-    return [], []
+#     for attempt in range(max_retries):
+#         try:
+#             with driver.session() as session:
+#                 cypher = """
+#                 MATCH (t:Type)
+#                 WHERE t.name IN $names
+#                 WITH collect(t) AS ts
+#                 UNWIND ts AS t1
+#                 UNWIND ts AS t2
+#                 WITH t1, t2 WHERE elementId(t1) < elementId(t2)
+#                 MATCH path = allShortestPaths((t1)-[*..2]-(t2))
+#                 RETURN path
+#                 """
+#                 result = session.run(cypher, parameters={"names": list_of_types})
+#                 nodes, edges = extract_graph_from_neo4j(result)
+#                 return nodes, edges
+#         except (SessionExpired, ServiceUnavailable, TransientError) as e:
+#             print(f"Neo4j connection error: {e}. Retrying ({attempt+1}/{max_retries})...")
+#             time.sleep(1 * (attempt+1))
+#     return [], []
 
 
-
-def get_pokemon_relational_graph(driver, graph_info, max_retries=3):
-    list_of_nodes = [elem["p.name"] for elem in graph_info]
+def get_pokemon_relational_graph(driver, list_of_nodes, max_retries=3):
+    #list_of_nodes = [elem["p.name"] for elem in graph_info]
 
     for attempt in range(max_retries):
         try:
@@ -183,13 +197,23 @@ def get_pokemon_relational_graph(driver, graph_info, max_retries=3):
             time.sleep(1 * (attempt+1))
     raise Exception("Max retries exceeded")
 
-def get_graph_by_type(driver, graph_info):
-    if any("p.name" in elem for elem in graph_info):
-        return get_pokemon_relational_graph(driver, graph_info)
-    elif any("t.name" in elem for elem in graph_info):
-        return get_type_graph(driver, graph_info)
+def get_graph_by_type(driver, graph_info, pokemon_names):
+    # if any("p.name" in elem for elem in graph_info):
+    #     return get_pokemon_relational_graph(driver, graph_info)
+    # elif any("t.name" in elem for elem in graph_info):
+    #     return get_type_graph(driver, graph_info)
     # qui puoi aggiungere altri casi (categorie, ecc)
-    else:
+    list_of_nodes = []
+    for dict in graph_info: # iterate over all the dictionary in graph_info
+        logging.info(f"dictionary in graph info: {dict}")
+        for key,value in dict.items(): # iterate over keys and values (just to extract the first key, value pair)
+            if value in pokemon_names:
+                list_of_nodes = [elem[key] for elem in graph_info]
+            break
+    # what to do if graph_info does not contain any pokemon name?
+    if list_of_nodes:
+        return get_pokemon_relational_graph(driver, list_of_nodes)
         # Nessun nodo grafico riconosciuto → ritorno vuoto
+    else:
         return [], []
 
