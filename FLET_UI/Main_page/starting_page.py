@@ -1,3 +1,4 @@
+import asyncio
 from typing import Optional
 import flet as ft
 
@@ -70,27 +71,47 @@ class Starting_page(ft.Container):
         if self.on_submit_query:
             self.on_submit_query(e)
 
-    def animate_out(self):
+    def animate_out(self, on_animation_end : Optional[callable] = None):
+        def at_end(e: ft.ControlEvent):
+            self.visible = False
+            if on_animation_end: on_animation_end(e)
+
+        self.on_animation_end = at_end
         self.offset =  ft.Offset(0, -1.5)
         self.update()
-    
-    def animate_in(self):
-        self.offset =  ft.Offset(0, 0)
+
+    def animate_in(self, on_animation_end: Optional[callable] = None): 
+        #not used       
+        def at_end(e: ft.ControlEvent):
+            if on_animation_end: on_animation_end(e)
+
+        self.visible = True
+        self.on_animation_end = at_end
+        self.offset =  ft.Offset(0, -1.5)
         self.update()
 
+    def did_mount(self):
+        self.offset = ft.Offset(0, -1.5)
+        self.update()
+        self.page.run_task(self._delayed_animate)
+
+    async def _delayed_animate(self):
+        await asyncio.sleep(0.05)  # Delay lets initial state render
+        self.offset = ft.Offset(0, 0)
+        self.update()
+        
 if __name__ == "__main__":
     def main(page: ft.Page):
+        start = None
 
-        out = False
+        def proceed(e):
+            nonlocal start
+            page.remove(start)
+            start = Starting_page(on_submit_query= animate)
+            page.add(start)
+
         def animate(e):
-            nonlocal out
-            if out:
-                start.animate_in()
-                out = False
-            else:
-                start.animate_out()
-                out = True
-                page.add(ft.IconButton(icon=ft.Icons.EXPAND, on_click= animate))
+            start.animate_out(on_animation_end= proceed)
 
         start = Starting_page(on_submit_query= animate)
 
