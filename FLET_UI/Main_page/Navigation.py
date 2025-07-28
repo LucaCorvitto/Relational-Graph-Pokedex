@@ -59,8 +59,7 @@ if __name__ == "__main__":
 
             if page.route.startswith("/query="):
                 query = starting_page.input_box.value
-                starting_page.on_animation_end = lambda _: query_page_go(query)
-                starting_page.animate_out()
+                starting_page.animate_out(on_animation_end= lambda _: query_page_go(query))
 
         page.on_route_change = route_change
 
