@@ -65,6 +65,7 @@ class Starting_page(ft.Container):
 
     def send_query(self, e:ft.ControlEvent):
         query = self.input_box.value
+        e.control.data = query
         print(query)
         if self.on_submit_query:
             self.on_submit_query(e)
@@ -72,11 +73,27 @@ class Starting_page(ft.Container):
     def animate_out(self):
         self.offset =  ft.Offset(0, -1.5)
         self.update()
-        
+    
+    def animate_in(self):
+        self.offset =  ft.Offset(0, 0)
+        self.update()
 
 if __name__ == "__main__":
     def main(page: ft.Page):
-        start = Starting_page(on_submit_query= lambda _ : start.animate_out())
+
+        out = False
+        def animate(e):
+            nonlocal out
+            if out:
+                start.animate_in()
+                out = False
+            else:
+                start.animate_out()
+                out = True
+                page.add(ft.IconButton(icon=ft.Icons.EXPAND, on_click= animate))
+
+        start = Starting_page(on_submit_query= animate)
+
         page.add(TopNavigationPokedex())
         page.add(start)
 

@@ -33,11 +33,11 @@ class PokedexTopShape(cv.Canvas):
     def draw_zigzag(self, e=None):
         self.shapes = []
 
-        self.width = self.page.window.width
+        self.width = self.page.width
 
         # Main shape
         path_commands = [cv.Path.MoveTo(0, 0)]
-        path_commands.extend(self.draw_path())  # FIXED HERE
+        path_commands.extend(self.draw_path())
 
         self.shapes.append(
             cv.Path(
@@ -82,37 +82,73 @@ class PokedexTopShape(cv.Canvas):
         self.page.update()
 #=============================================================================================
 
-class Top_navigation(ft.Container):
-    def  __init__(self):
+class TopNavigationPokedex(ft.Container):
+    def  __init__(
+            self,
+            title: Optional[str] = "Pokedex",
+            color : Optional[ft.Colors] = "red",
+            on_submit_query : Optional[callable] = None,
+            on_expand_query : Optional[callable] = None,
+        ):
 
         self.light_buttons = ft.Row( [
+            ft.Divider(),
             lighting_button(50, "Blue", do_blink= True),
             lighting_button(25, "red"),
             lighting_button(25, "yellow"),
             lighting_button(25, "green"),
             ] )
+        
+        self.title = Text_decorator(title)
 
-        super().__init__(
+        self.query_field = ft.TextField(
+            value="previous_query",
+            suffix= ft.IconButton(ft.Icons.SEND, on_click= on_submit_query),
+            prefix= ft.IconButton(ft.Icons.EXPAND, on_click= on_expand_query),
+            bgcolor= ft.Colors.GREY_300,
+            visible= False,
+            multiline= True
+            )
+
+        header = ft.Row(
+            [
+                self.light_buttons,
+                self.title,
+                self.query_field
+            ],
+            alignment= ft.MainAxisAlignment.SPACE_BETWEEN,
+            expand=True
+        )
+
+        invisi_container = ft.Container(
             height=80,
             bgcolor= ft.Colors.with_opacity(0, "black"),
             padding= 10,
-            #border_radius= border_radius,
-            content= self.light_buttons,
+            content= header,
         )
-
-class TopNavigationPokedex(ft.Container):
-    """
-    Should be working ONLY if added to the page first
-    """
-    def  __init__(self, color : Optional[ft.Colors] = "red"):
-        super().__init__(content= ft.Text("This is TopNavigationPokedex placeholder"), height= 50)
-
+        
         self.structure = ft.Stack([
             PokedexTopShape(color=color),
-            Top_navigation()
+            invisi_container
         ])
 
+        super().__init__(
+            content= ft.Text("This is TopNavigationPokedex placeholder"),
+            height= 50
+        )
+
+    def show_query_field(self, query: Optional[str] = None):
+        self.query_field.value = query
+        self.query_field.visible = True
+        self.query_field.update()
+    
+    def hide_query_field(self):
+        self.query_field.visible = False
+        self.query_field.update()
+
     def did_mount(self):
+        self.page.controls.remove(self)
+        self.page.controls.insert(0, self)
         self.page.overlay.append(self.structure)
         self.page.update()
 
@@ -123,6 +159,8 @@ class TopNavigationPokedex(ft.Container):
 
 if __name__ == "__main__":
     def main(page: ft.Page):
-        page.add (TopNavigationPokedex())
+        poke = TopNavigationPokedex()
+        page.add (poke)
+        page.add(ft.TextField(hint_text="insert_query", on_submit= lambda _ : poke.show_query_field("lol")))
 
-    ft.app(target=main)
+    ft.app(target=main, view= ft.AppView.WEB_BROWSER)
