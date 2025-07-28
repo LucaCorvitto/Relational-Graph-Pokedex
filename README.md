@@ -76,6 +76,13 @@ The following are edits that can be done at the same time, changing the flow of 
 * Extract information directly from the query, to understand what the user is asking and plot the right graph (Take pokemon names, types, relationships etc)
 * Extract information from the rag output, building a graph in any case
 * Change the workflow of the application, from deciding if perform rag or cypher rag to perform both with graph traversal
+##### How to do it
+Let the model do a cypher query outputting a list of names/types and then visualize graphs with additional functions.
+* visualize a graph based on the pokemon listed in the output, to do so analyze the values of the keys
+  * if value is a pokemon name visualize the graph of the pokemon name and links (choose how many)
+  * if value is a type name ?
+  * if value is ?
+
 ### UI
 * Update the UI and UX, from just a pokedex to a richer interface, IDEAS:
   * Keep the pokedex on the side (right or left) and let visualize the images of the output pokemon instead of the graph in it, on the other side let's visualize different graphs highlighting different relationships between the search pokemon. We can make a single pokedex but that can be opened up, it's close in the mobile version and open in the desktop one
