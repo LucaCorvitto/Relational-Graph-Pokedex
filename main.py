@@ -2,7 +2,6 @@ from fastapi import FastAPI
 from typing import List, Optional, Dict, Union
 from pydantic import BaseModel, Field
 from fastapi.middleware.cors import CORSMiddleware
-import logging
 from utils import *
 from my_langgraph_definition import building_pokemon_graph
 from fastapi.staticfiles import StaticFiles
@@ -11,18 +10,18 @@ import uvicorn
 DEBUG=False
 DEBUG=True            # decommenta per debug / commenta per produzione
 API=False
-GEN_MODEL="mistral:7b"
+GEN_MODEL="llama3.1:8b"
 CODE_MODEL="qwen2.5-coder:7b"
 
 # --- Setup logging ---
-logging.basicConfig(
-    filename="requests.log",
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s"
-)
+# logging.basicConfig(
+#     filename="requests.log",
+#     level=logging.INFO,
+#     format="%(asctime)s - %(levelname)s - %(message)s"
+# )
 
 # --- Init ---
-init = initialization(debug=DEBUG, api=API)
+init = initialization(debug=DEBUG, api=API, gen_model=GEN_MODEL, code_model=CODE_MODEL)
 llm = init["llm"]
 code_llm = init["code_llm"]
 vectorstore = init["vectorstore"]
@@ -63,7 +62,7 @@ class QueryRequest(BaseModel):
 
 class QueryResponse(BaseModel):
     response: str
-    graph_info: List[Dict[str, Union[str, int, float]]]
+    graph_info: List[Dict[str, Union[str, int, float, list]]]
     nodes: List[Node]
     edges: List[Edge]
 

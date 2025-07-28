@@ -4,34 +4,20 @@ from pydantic import BaseModel, Field
 from langchain.schema import Document
 from neo4j.exceptions import SessionExpired, ServiceUnavailable, TransientError
 import time
-
-# while ($true) {
-#     Start-Process -FilePath "ollama" -ArgumentList "pull mistral:7b" -NoNewWindow -Wait
-#     Start-Sleep -Seconds 20
-# }
-
-# while ($true) {
-#     $process = Start-Process -FilePath "ollama" -ArgumentList "pull mistral:7b" -NoNewWindow -PassThru
-#     Start-Sleep -Seconds 20
-#     if (!$process.HasExited) {
-#         $process.Kill()
-#         Write-Host "Process killed after timeout"
-#     }
-# }
-
+from utils import logging, extract_cypher_query
 
 def building_pokemon_graph(llm, code_llm, vectorstore, driver, NEO4J_URI, NEO4J_AUTH):
 
-    class RoutingOutput(BaseModel):
-        route_to: Literal["rag", "cypher"] =  Field(..., description="Method of answering to use.")
+    # class RoutingOutput(BaseModel):
+    #     route_to: Literal["rag", "cypher"] =  Field(..., description="Method of answering to use.")
 
-    class CypherQueryOutput(BaseModel):
-        cypher_query: str = Field(..., description="The generated cypher query.")
+    # class CypherQueryOutput(BaseModel):
+    #     cypher_query: str = Field(..., description="The generated cypher query.")
 
     class RelationalPokemonDex(TypedDict):
         query: str
         docs: List[Document]
-        cypher_query: CypherQueryOutput
+        cypher_query: str #CypherQueryOutput
         graph_info: List[Dict[str, Any]]
         prompt: str
         context: str
@@ -75,16 +61,20 @@ def building_pokemon_graph(llm, code_llm, vectorstore, driver, NEO4J_URI, NEO4J_
 
         Answer with only one word: "cypher" or "rag".
         """
-        retrieving_method = llm.with_structured_output(RoutingOutput)
+        #retrieving_method = llm.with_structured_output(RoutingOutput)
 
-        decision = retrieving_method.invoke(prompt)#.strip().lower()
-        return decision.route_to # {"routing": decision}
+        #decision = retrieving_method.invoke(prompt)#.strip().lower()
+        decision = llm.invoke(prompt)#.strip().lower()
+        logging.info("decision: ", decision.content)
+        #return decision.route_to # {"routing": decision}
+        return decision.content # {"routing": decision}
 
     # 2. Generic RAG
 
     def pinecone_vector_retrieval(state: RelationalPokemonDex):
         query = state["query"]
         docs = vectorstore.similarity_search(query, k=5)
+        logging.info("docs: ", docs)
         return {"docs": docs}
 
     # 3. Cypher RAG
@@ -118,10 +108,18 @@ def building_pokemon_graph(llm, code_llm, vectorstore, driver, NEO4J_URI, NEO4J_
     Only return the Cypher query. Do not explain anything.
     """
 #MATCH (bulba:Pokemon {name: "Bulbasaur"})-[:HAS_TYPE]->(type:Type) WITH bulba, collect(DISTINCT type) AS bulbaTypes MATCH (other:Pokemon)-[:HAS_TYPE]->(type2:Type) WITH bulba, bulbaTypes, other, collect(DISTINCT type2) AS otherTypes WHERE other <> bulba AND apoc.coll.toSet(bulbaTypes) = apoc.coll.toSet(otherTypes) RETURN other.name AS pokemon_with_same_types
-        full_prompt = f"{system}\n\nUser question: {query}\nCypher query:"
-        output_format = code_llm.with_structured_output(CypherQueryOutput)
-        cypher = output_format.invoke(full_prompt)#.strip()
-        return {"cypher_query": cypher.cypher_query}
+        full_prompt = f"""{system}
+        User question: {query}
+        Cypher query:"""
+        #output_format = code_llm.with_structured_output(CypherQueryOutput)
+        #cypher = output_format.invoke(full_prompt)#.strip()
+        logging.info("code_llm: ", code_llm.model)
+        cypher = code_llm.invoke(full_prompt)#.strip()
+        logging.info("cypher_query: ", cypher.content)
+        # post-process the output to match a valid cypher query:
+        cypher_query = extract_cypher_query(cypher.content)
+        #return {"cypher_query": cypher.cypher_query}
+        return {"cypher_query": cypher_query}
 
 
     # def run_cypher_and_format(state: RelationalPokemonDex):
@@ -148,7 +146,7 @@ def building_pokemon_graph(llm, code_llm, vectorstore, driver, NEO4J_URI, NEO4J_
                     formatted = "\n".join(str(r) for r in rows)
                     return {"context": formatted, "graph_info":rows}
             except (SessionExpired, ServiceUnavailable, TransientError) as e:
-                print(f"Neo4j connection error: {e}. Retry {attempt + 1} of {max_retries}...")
+                logging.info(f"Neo4j connection error: {e}. Retry {attempt + 1} of {max_retries}...")
                 time.sleep(1 * (attempt + 1))  # backoff esponenziale semplice
         raise Exception("Max retries exceeded for Neo4j query")
 
