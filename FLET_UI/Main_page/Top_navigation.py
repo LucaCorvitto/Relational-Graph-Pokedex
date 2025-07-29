@@ -1,3 +1,4 @@
+import asyncio
 from typing import Optional
 import flet as ft
 import flet.canvas as cv
@@ -47,7 +48,7 @@ class PokedexTopShape(cv.Canvas):
             cv.Path.LineTo(width, self.height + y_offset),
             cv.Path.LineTo((width) +30, self.height -20 + y_offset),
             cv.Path.LineTo(self.width, self.height -20 + y_offset),
-            cv.Path.LineTo(self.width, 0 + y_offset),
+            cv.Path.LineTo(self.width, -self.height*5 + y_offset),
             cv.Path.Close(),
         ]
 
@@ -58,7 +59,7 @@ class PokedexTopShape(cv.Canvas):
         self.height = height
 
         # Main shape
-        path_commands = [cv.Path.MoveTo(0, 0)]
+        path_commands = [cv.Path.MoveTo(0, -self.height*5)]
         path_commands.extend(self.draw_path())
 
         self.shapes.append(
@@ -164,7 +165,10 @@ class TopNavigationPokedex(ft.Container):
         self.structure = ft.Stack([
             self.outline,
             self.invisi_container
-        ])
+        ],
+        animate_position = ft.Animation(500, ft.AnimationCurve.LINEAR),
+        top= 0
+        )
 
         super().__init__(
             content= ft.Text("This is TopNavigationPokedex placeholder"),
@@ -190,6 +194,7 @@ class TopNavigationPokedex(ft.Container):
         self.outline.draw_zigzag(width= self.width, height= self.height + self.overlap)
         self.outline.update()
         self.invisi_container.height = self.height
+        self.invisi_container.width = self.width
         self.invisi_container.update()
         self.update()
 
@@ -216,11 +221,64 @@ class TopNavigationPokedex(ft.Container):
         self.page.overlay.remove(self.structure)
         self.page.update()
 
+    def _animate_scrolling(self, target_position: float):
+        """
+        Target position is relative to the page
+        if you wish to call this animation, write another code that calls for self.on_animation_end at the end of the animation
+        (it has to be a different function to avoid conflicts with animate_open_close)
+        """
+        target_position = self.page.height * target_position
+        self.structure.top = target_position
+        self.structure.update()
+
+    def animate_open_close(
+            self,
+            target_position: float,
+            delay_ms: int = 500,
+            on_half_animation : Optional[callable] = None
+        ):
+        """
+        Moves structure to `target_position`, waits for `delay_ms`,
+        then animates back to 0.
+        """
+        target_position = self.page.height * target_position
+
+        # Ensure animate_position is set
+        self.structure.animate_position = ft.Animation(500, ft.AnimationCurve.EASE_IN_OUT)
+
+        async def delayed_return(_):
+            if on_half_animation:
+                on_half_animation(_)
+            # Wait for given milliseconds
+            await asyncio.sleep(delay_ms / 1000)
+            if self.on_animation_end:
+                self.structure.on_animation_end = self.on_animation_end
+            self._animate_scrolling(0)
+
+        # Attach async callback
+        self.structure.on_animation_end = lambda e: self.page.run_task(delayed_return, e)
+
+        # Start animation
+        self.structure.top = target_position
+        self.structure.update()
+
 
 if __name__ == "__main__":
     def main(page: ft.Page):
-        poke = TopNavigationPokedex()
-        page.add (poke)
-        page.add(ft.TextField(hint_text="insert_query", on_submit= lambda _ : poke.show_query_field("lol")))
+
+        # This triggers after did_mount has placed structure in overlay
+        def move(e):
+            poke.show_query_field("lol")
+            poke.on_animation_end = lambda _: print("finito!")
+            poke.animate_open_close(0.5, on_half_animation= lambda _: print("siamo a meta'!"))
+
+        poke = TopNavigationPokedex(on_submit_query= move)
+
+        page.add(ft.TextField(
+            hint_text="insert_query",
+            on_submit=move
+        ))
+
+        page.add(poke)
 
     ft.app(target=main)
