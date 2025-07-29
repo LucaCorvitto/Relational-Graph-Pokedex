@@ -28,6 +28,11 @@ Still limited to the first generation and on the current relationships:
 ## TODO
 ### Models
 Model to download and test:
+needed to make it work for now:
+* ollama pull llama3.1:8b (general)
+* ollama pull qwen2.5-coder:7b (coding-cypher)
+* ollama pull nomic-embed-text (embedding-simple rag)
+
 * general tasks
   * ollama pull deepseek-r1:8b
   * ollama pull gemma3n:e4b
@@ -44,6 +49,9 @@ Model to download and test:
 
 ### Features
 Follow the order of implementation, first enlarge the KG and then edit the langgraph process.
+
+Add cards of different types related to the performed search (pokemon card, type card etc), cards explodes on mouse hover or click.
+
 #### Knowledge Graph
 * Update the Knowledge Graph adding new relationships and using more specific ones, like:
   * `BELONGS_TO_GEN`
