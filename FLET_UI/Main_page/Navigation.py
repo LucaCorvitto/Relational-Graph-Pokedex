@@ -9,6 +9,7 @@ sys.path.insert(0, parent_dir)
 
 from FLET_UI.Main_page.starting_page import Starting_page
 from FLET_UI.Main_page.Top_navigation import TopNavigationPokedex
+from FLET_UI.Main_page.Bottom_pokedex import BottomPokedex
 from FLET_UI.Main_page.visual_page import Main_structure
 
 if __name__ == "__main__":
@@ -29,26 +30,33 @@ if __name__ == "__main__":
         navigation = TopNavigationPokedex(on_expand_query= change_route)
         starting_page = Starting_page(on_submit_query= submit_query)
         query_page = Main_structure()
+        bottom_nav = BottomPokedex()
+
+        page.visualised_page = starting_page
+        page.spacing = 0
 
         page.add(navigation)
-        page.add(starting_page)
+        page.add(page.visualised_page)
+        page.add(bottom_nav)
 
         def query_page_go(query):
-            if query_page in page.controls:
+            if page.visualised_page == query_page:
                 return
-            page.controls.pop()
+            page.controls.remove(page.visualised_page)
             navigation.show_query_field(query)
+            page.visualised_page = query_page
             page.add(query_page)
 
         def main_page_go(query):
-            if starting_page in page.controls:
+            if page.visualised_page == starting_page:
                 return
-            page.controls.pop()
+            page.controls.remove(page.visualised_page)
             navigation.hide_query_field()
             page.add(starting_page)
             starting_page.offset = ft.Offset(0, -1.5)
             page.update()
             starting_page.input_box.value = query
+            page.visualised_page = starting_page
             starting_page.animate_in()
 
         def route_change(e: ft.ControlEvent):

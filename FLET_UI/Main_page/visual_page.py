@@ -7,8 +7,6 @@ import os
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 sys.path.insert(0, parent_dir)
 
-from FLET_UI.Custom_elements.text_decorator import Text_decorator
-from FLET_UI.Main_page.lighting_button import lighting_button
 from FLET_UI.Main_page.Top_navigation import TopNavigationPokedex
 
 class Main_structure(ft.Container):
@@ -39,7 +37,7 @@ class Main_structure(ft.Container):
         
 if __name__ == "__main__":
     def main(page: ft.Page):
-        page.add(TopNavigationPokedex())
+        page.add(TopNavigationPokedex(height_page_ratio=2/5))
         page.add(Main_structure())
 
         page.update()
