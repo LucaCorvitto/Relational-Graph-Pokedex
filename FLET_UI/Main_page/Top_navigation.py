@@ -14,26 +14,33 @@ from FLET_UI.Main_page.lighting_button import lighting_button
 
 #POKEDEX SHAPE------------------------------------------------------
 class PokedexTopShape(cv.Canvas):
-    def __init__(self, color: ft.Colors = "blue", height : int = 90, shadow_offset: float = 5.0):
+    def __init__(self, color: ft.Colors = "blue", width = 80, heigth = 80, shadow_offset: float = 5.0):
         super().__init__(expand=True)
         self.shadow_offset = shadow_offset
         self.color = color
-        self.height = height
+        self.heigth = heigth
+        self.width = width
 
-    def draw_path(self, y_offset=0):
+    def draw_path(self, y_offset=0, width_limit = 170):
+
+        #width limit is needed to keep the space for the lights.
+        if width_limit >0:
+            width = self.width/3 if self.width/3 > width_limit else width_limit
+
         return [
-            cv.Path.LineTo(0, self.height *0.8 + y_offset),
-            cv.Path.LineTo(self.width * 2 / 3, self.height *0.8 + y_offset),
-            cv.Path.LineTo(self.width * 3 / 4, self.height + y_offset),
-            cv.Path.LineTo(self.width, self.height + y_offset),
+            cv.Path.LineTo(0, self.height + y_offset),
+            cv.Path.LineTo(width, self.height + y_offset),
+            cv.Path.LineTo((width) +30, self.height -20 + y_offset),
+            cv.Path.LineTo(self.width, self.height -20 + y_offset),
             cv.Path.LineTo(self.width, 0 + y_offset),
             cv.Path.Close(),
         ]
 
-    def draw_zigzag(self, e=None):
+    def draw_zigzag(self, width, height, e=None):
         self.shapes = []
 
-        self.width = self.page.width
+        self.width = width
+        self.height = height
 
         # Main shape
         path_commands = [cv.Path.MoveTo(0, 0)]
@@ -61,7 +68,7 @@ class PokedexTopShape(cv.Canvas):
         )
 
         # Shadow
-        shadow_path = [cv.Path.MoveTo(0, self.height / 8 + self.shadow_offset)]
+        shadow_path = [cv.Path.MoveTo(0, self.height * 3/ 8 + self.shadow_offset)]
         shadow_path.extend(self.draw_path(y_offset=self.shadow_offset))  # FIXED HERE
 
         self.shapes.append(
@@ -74,12 +81,6 @@ class PokedexTopShape(cv.Canvas):
             )
         )
 
-        self.update()
-
-    def did_mount(self):
-        self.draw_zigzag()
-        self.page.on_resized = self.draw_zigzag  # Correct handler assignment
-        self.page.update()
 #=============================================================================================
 
 class TopNavigationPokedex(ft.Container):
@@ -87,9 +88,13 @@ class TopNavigationPokedex(ft.Container):
             self,
             title: Optional[str] = "Pokedex",
             color : Optional[ft.Colors] = "red",
+            height_page_ratio = 1/8,
             on_submit_query : Optional[callable] = None,
             on_expand_query : Optional[callable] = None,
         ):
+        
+        self.min_height = 80
+        self.height_page_ratio = height_page_ratio
 
         self.light_buttons = ft.Row( [
             ft.Divider(),
@@ -120,16 +125,19 @@ class TopNavigationPokedex(ft.Container):
             expand=True
         )
 
-        invisi_container = ft.Container(
+        self.invisi_container = ft.Container(
             height=80,
             bgcolor= ft.Colors.with_opacity(0, "black"),
             padding= 10,
             content= header,
+            alignment= ft.alignment.bottom_center
         )
+
+        self.outline = PokedexTopShape(color=color)
         
         self.structure = ft.Stack([
-            PokedexTopShape(color=color),
-            invisi_container
+            self.outline,
+            self.invisi_container
         ])
 
         super().__init__(
@@ -146,11 +154,36 @@ class TopNavigationPokedex(ft.Container):
         self.query_field.visible = False
         self.query_field.update()
 
+    def _update_children(self, e = None):
+        height = self.page.height * self.height_page_ratio
+
+        height = height if height > self.min_height else self.min_height
+
+        self.width = self.page.width
+        self.height = height
+        self.outline.draw_zigzag(width= self.width, height= self.height)
+        self.outline.update()
+        self.invisi_container.height = self.height -10
+        self.invisi_container.update()
+        self.update()
+
+
     def did_mount(self):
+        #make sure the control is at the top of the page
         self.page.controls.remove(self)
         self.page.controls.insert(0, self)
         self.page.overlay.append(self.structure)
         self.page.update()
+        self._update_children()
+        # Chain on_resized handlers
+        previous_handler = self.page.on_resized
+
+        def combined_handler(e):
+            self._update_children(e)
+            if previous_handler:
+                previous_handler(e)
+
+        self.page.on_resized = combined_handler
 
     def will_unmount(self):
         self.page.overlay.remove(self.structure)
@@ -163,4 +196,4 @@ if __name__ == "__main__":
         page.add (poke)
         page.add(ft.TextField(hint_text="insert_query", on_submit= lambda _ : poke.show_query_field("lol")))
 
-    ft.app(target=main, view= ft.AppView.WEB_BROWSER)
+    ft.app(target=main)
