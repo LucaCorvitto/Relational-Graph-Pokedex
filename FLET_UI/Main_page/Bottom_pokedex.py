@@ -1,3 +1,4 @@
+import asyncio
 from typing import Optional
 import flet as ft
 import flet.canvas as cv
@@ -42,7 +43,7 @@ class PokedexBottomShape(cv.Canvas):
         else:
             width_limit = 0
 
-        h = self.height
+        h = self.height * 5
 
         return [
             # from bottom-right, move left
@@ -59,7 +60,7 @@ class PokedexBottomShape(cv.Canvas):
         self.width = width
         self.height = height
 
-        h = self.height
+        h = self.height * 5
 
         # Start from bottom-right
         path_commands = [cv.Path.MoveTo(self.width, h)]
@@ -104,7 +105,10 @@ class PokedexBottomShape(cv.Canvas):
 
 #=============================================================================================
 
-class BottomPokedex(ft.Container):
+class BottomPokedex(ft.Stack):
+    """
+    Make sure to append this on the page overlay.
+    """
     def  __init__(
             self,
             title: Optional[str] = "Pokedex",
@@ -113,6 +117,8 @@ class BottomPokedex(ft.Container):
             width_page_ratio : float = 1/2,
             overlap : int = 25,
         ):
+
+        self.previous_handler = None #used in did_mount
         
         if height_page_ratio < 0 or height_page_ratio > 1:
             raise ValueError("height_page_ratio must be between 0 and 1")
@@ -146,15 +152,13 @@ class BottomPokedex(ft.Container):
 
         self.outline = PokedexBottomShape(color=color, width_ratio = self.width_page_ratio)
         
-        self.structure = ft.Stack([
+        super().__init__([
             self.outline,
             self.invisi_container
         ],
         bottom= 0,
-        alignment= ft.alignment.top_right
-        )
-        super().__init__(
-            bgcolor= ft.Colors.with_opacity(0, "black"),
+        alignment= ft.alignment.top_right,
+        animate_position = ft.Animation(500, ft.AnimationCurve.LINEAR),
         )
 
     def _update_children(self, e = None):
@@ -173,32 +177,66 @@ class BottomPokedex(ft.Container):
 
 
     def did_mount(self):
-        #make sure the control is at the top of the page# Ensure this component appears last (at the bottom)
-        if self in self.page.controls:
-            self.page.controls.remove(self)
-        self.page.controls.append(self)
-        self.page.overlay.append(self.structure)
-        self.page.update()
         self._update_children()
         # Chain on_resized handlers
-        previous_handler = self.page.on_resized
+        self.previous_handler = self.page.on_resized
 
         def combined_handler(e):
             self._update_children(e)
-            if previous_handler:
-                previous_handler(e)
+            if self.previous_handler:
+                self.previous_handler(e)
 
         self.page.on_resized = combined_handler
 
     def will_unmount(self):
-        self.page.overlay.remove(self.structure)
+        if self.previous_handler:
+            self.page.on_resized = self.previous_handler
         self.page.update()
 
+    
+    def _animate_scrolling(self, target_position: float):
+        """
+        Target position is relative to the page
+        if you wish to call this animation, write another code that calls for self.on_animation_end at the end of the animation
+        (it has to be a different function to avoid conflicts with animate_open_close)
+        """
+        target_position = self.page.height * target_position
+        self.bottom = target_position
+        self.update()
+
+    def animate_open_close(
+            self,
+            target_position: float = 0.3,
+            delay_ms: int = 500,
+            on_half_animation : Optional[callable] = None
+        ):
+        """
+        Moves structure to `target_position`, waits for `delay_ms`,
+        then animates back to 0.
+        """
+        # Ensure animate_position is set
+        self.animate_position = ft.Animation(500, ft.AnimationCurve.EASE_IN_OUT)
+
+        async def delayed_return(_):
+            if on_half_animation:
+                on_half_animation(_)
+            # Wait for given milliseconds
+            await asyncio.sleep(delay_ms / 1000)
+            if self.on_animation_end:
+                self.on_animation_end = self.on_animation_end
+            self._animate_scrolling(0)
+
+        # Attach async callback
+        self.on_animation_end = lambda e: self.page.run_task(delayed_return, e)
+
+        # Start animation
+        self._animate_scrolling(target_position)
 
 if __name__ == "__main__":
     def main(page: ft.Page):
-        poke = BottomPokedex(height_page_ratio= 3/5)
-        page.add (poke)
-        page.add(ft.TextField(hint_text="insert_query", on_submit= lambda _ : poke.show_query_field("lol")))
+        poke = BottomPokedex()
+        page.add(ft.IconButton(ft.Icons.ABC, on_click= lambda _: poke.animate_open_close()))
+        page.overlay.append(poke)
+        page.update()
 
     ft.app(target=main)

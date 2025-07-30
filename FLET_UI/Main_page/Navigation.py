@@ -1,3 +1,4 @@
+import asyncio
 import flet as ft
 
 import sys
@@ -12,8 +13,11 @@ from FLET_UI.Main_page.Top_navigation import TopNavigationPokedex
 from FLET_UI.Main_page.Bottom_pokedex import BottomPokedex
 from FLET_UI.Main_page.visual_page import Main_structure
 
+CURRENT_PAGE : ft.Container = None
+
 if __name__ == "__main__":
     def main(page: ft.Page):
+        global CURRENT_PAGE
         page.title = "POKEDEX"
         page.route = "/main_page"
 
@@ -27,48 +31,54 @@ if __name__ == "__main__":
         def change_route(e: ft.ControlEvent):
             page.go("/main_page")
 
-        navigation = TopNavigationPokedex(on_expand_query= change_route)
+        navigation = TopNavigationPokedex(width_page_ratio= 0.5,on_expand_query= change_route)
         starting_page = Starting_page(on_submit_query= submit_query)
         query_page = Main_structure()
         bottom_nav = BottomPokedex()
 
-        page.visualised_page = starting_page
+        CURRENT_PAGE = starting_page
         page.spacing = 0
 
         page.add(navigation)
-        page.add(page.visualised_page)
-        page.add(bottom_nav)
+        page.overlay.append(bottom_nav)
+        page.update()
 
         def query_page_go(query):
-            if page.visualised_page == query_page:
+            if CURRENT_PAGE == query_page:
                 return
-            page.controls.remove(page.visualised_page)
+            page.controls.remove(CURRENT_PAGE)
             navigation.show_query_field(query)
-            page.visualised_page = query_page
+            CURRENT_PAGE = query_page
             page.add(query_page)
 
         def main_page_go(query):
-            if page.visualised_page == starting_page:
+            if CURRENT_PAGE == starting_page:
                 return
-            page.controls.remove(page.visualised_page)
+            page.controls.remove(CURRENT_PAGE)
             navigation.hide_query_field()
             page.add(starting_page)
-            starting_page.offset = ft.Offset(0, -1.5)
-            page.update()
             starting_page.input_box.value = query
-            page.visualised_page = starting_page
-            starting_page.animate_in()
+            CURRENT_PAGE = starting_page
 
-        def route_change(e: ft.ControlEvent):
+        def animate_page_change(on_half: callable, on_end: callable):
+            navigation.on_animation_end = on_end
+            navigation.animate_open_close(on_half_animation= on_half)
+            bottom_nav.animate_open_close()
+
+        async def route_change(e: ft.ControlEvent):
+            await asyncio.sleep(0.5)
+            animate_page_change(on_half= lambda _: page.add(CURRENT_PAGE), on_end= lambda _: print("fired"))
 
             if page.route == "/main_page":
                 query = navigation.query_field.value if navigation.query_field.visible else None
-                main_page_go(query)
+                #main_page_go(query)
 
             if page.route.startswith("/query="):
                 query = starting_page.input_box.value
-                starting_page.animate_out(on_animation_end= lambda _: query_page_go(query))
+                #query_page_go(query)
+
 
         page.on_route_change = route_change
+        
 
     ft.app(target=main)

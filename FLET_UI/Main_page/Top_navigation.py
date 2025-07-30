@@ -111,6 +111,8 @@ class TopNavigationPokedex(ft.Container):
             on_expand_query : Optional[callable] = None
         ):
         
+        self.previous_handler = None # used in did_mount
+
         if height_page_ratio < 0 or height_page_ratio > 1:
             raise ValueError("height_page_ratio must be between 0 and 1")
         
@@ -208,16 +210,18 @@ class TopNavigationPokedex(ft.Container):
         self.page.update()
         self._update_children()
         # Chain on_resized handlers
-        previous_handler = self.page.on_resized
+        self.previous_handler = self.page.on_resized
 
         def combined_handler(e):
             self._update_children(e)
-            if previous_handler:
-                previous_handler(e)
+            if self.previous_handler:
+                self.previous_handler(e)
 
         self.page.on_resized = combined_handler
 
     def will_unmount(self):
+        if self.previous_handler:
+            self.page.on_resized = self.previous_handler
         self.page.overlay.remove(self.structure)
         self.page.update()
 
@@ -233,7 +237,7 @@ class TopNavigationPokedex(ft.Container):
 
     def animate_open_close(
             self,
-            target_position: float,
+            target_position: float = 0.4,
             delay_ms: int = 500,
             on_half_animation : Optional[callable] = None
         ):
@@ -241,7 +245,6 @@ class TopNavigationPokedex(ft.Container):
         Moves structure to `target_position`, waits for `delay_ms`,
         then animates back to 0.
         """
-        target_position = self.page.height * target_position
 
         # Ensure animate_position is set
         self.structure.animate_position = ft.Animation(500, ft.AnimationCurve.EASE_IN_OUT)
@@ -259,8 +262,7 @@ class TopNavigationPokedex(ft.Container):
         self.structure.on_animation_end = lambda e: self.page.run_task(delayed_return, e)
 
         # Start animation
-        self.structure.top = target_position
-        self.structure.update()
+        self._animate_scrolling(target_position)
 
 
 if __name__ == "__main__":

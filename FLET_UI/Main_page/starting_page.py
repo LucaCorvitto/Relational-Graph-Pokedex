@@ -90,10 +90,12 @@ class Starting_page(ft.Container):
         self.offset =  ft.Offset(0, -1.5)
         self.update()
 
+    """
     def did_mount(self):
         self.offset = ft.Offset(0, -1.5)
         self.update()
         self.page.run_task(self._delayed_animate)
+    """
 
     async def _delayed_animate(self):
         await asyncio.sleep(0.05)  # Delay lets initial state render
