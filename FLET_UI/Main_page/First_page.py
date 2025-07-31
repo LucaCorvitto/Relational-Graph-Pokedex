@@ -1,4 +1,5 @@
 import asyncio
+import time
 from typing import Optional
 import flet as ft
 import flet.canvas as cv
@@ -18,7 +19,7 @@ class PokedexTopShape(cv.Canvas):
     def __init__(
             self,
             color: ft.Colors = "blue",
-            width_ratio : float = 1/3,
+            width_ratio : float = 1/2,
             width = 80,
             heigth = 80,
             shadow_offset: float = 5.0,
@@ -104,8 +105,8 @@ class TopNavigationPokedex(ft.Container):
             self,
             title: Optional[str] = "Pokedex",
             color : Optional[ft.Colors] = "red",
-            height_page_ratio : float = 1/8,
-            width_page_ratio : float = 1/3,
+            height_page_ratio : float = 4/5,
+            width_page_ratio : float = 1/2,
             overlap : int = 25,
             on_submit_query : Optional[callable] = None,
             on_expand_query : Optional[callable] = None
@@ -119,31 +120,41 @@ class TopNavigationPokedex(ft.Container):
         if width_page_ratio < 0 or width_page_ratio > 1:
             raise ValueError("width_page_ratio must be between 0 and 1")
 
-        self.min_height = 80
+        self.min_height = 350
         self.height_page_ratio = height_page_ratio
         self.width_page_ratio = width_page_ratio
 
+        self._vibrating = None
+
         self.overlap = overlap
+
+        self.light_0 = lighting_button(50, "Blue", do_blink= True)
+        self.light_1 = lighting_button(25, "red")
+        self.light_2 = lighting_button(25, "orange")
+        self.light_3 = lighting_button(25, "green")
 
         self.light_buttons = ft.Row( [
             ft.Divider(),
-            lighting_button(50, "Blue", do_blink= True),
-            lighting_button(25, "red"),
-            lighting_button(25, "yellow"),
-            lighting_button(25, "green"),
+            self.light_0,
+            self.light_1,
+            self.light_2,
+            self.light_3
             ] )
         
         self.title = Text_decorator(title)
 
-        self.query_field = ft.TextField(
-            value="previous_query",
-            suffix= ft.IconButton(ft.Icons.SEND, on_click= on_submit_query),
-            prefix= ft.IconButton(ft.Icons.EXPAND, on_click= on_expand_query),
-            bgcolor= ft.Colors.GREY_300,
-            visible= False,
-            multiline= True
-            )
+        self.query_field_prefix = ft.IconButton(ft.Icons.EXPAND, on_click= on_expand_query, visible=False)
 
+        self.query_field = ft.TextField(
+            hint_text="previous_query",
+            suffix= ft.IconButton(ft.Icons.SEND, on_click= on_submit_query),
+            prefix= self.query_field_prefix,
+            bgcolor= ft.Colors.GREY_300,
+            multiline= True,
+            height= 60,
+            on_change= self.sync_queries
+            )
+        
         header = ft.Row(
             [
                 self.light_buttons,
@@ -151,24 +162,64 @@ class TopNavigationPokedex(ft.Container):
                 self.query_field
             ],
             alignment= ft.MainAxisAlignment.SPACE_BETWEEN,
+            vertical_alignment= ft.CrossAxisAlignment.END,
             expand=True
+        )
+        
+        self.title = Text_decorator("This is Pokemon Relational Graph", expand_loose= True)
+
+        self.input_box = ft.TextField(
+            hint_text= "Insert here your query",
+            multiline= True,
+            bgcolor= ft.Colors.RED_200,
+            expand_loose= True,
+            suffix= ft.IconButton(ft.Icons.SEND, on_click= on_submit_query),
+            max_lines= 4,
+            on_change= self.sync_queries,
+        )
+
+        self.description_box = ft.Container(
+            content= ft.Text("This is a test description", selectable= True),
+            bgcolor= ft.Colors.RED_300,
+            padding=10,
+            margin=10,
+            border_radius= 20,
+            expand_loose= True,
+        )
+
+        self.upper_view = ft.Container(
+            ft.Column(
+                [self.title, self.input_box, self.description_box],
+                horizontal_alignment= ft.CrossAxisAlignment.CENTER
+                ),
+            expand = True,
+            padding= 50
+        )
+
+        content_column = ft.Column(
+            controls=[
+                self.upper_view,
+                header
+            ],
+            alignment= ft.MainAxisAlignment.END
         )
 
         self.invisi_container = ft.Container(
             height=80,
             bgcolor= ft.Colors.with_opacity(0, "black"),
             padding= 10,
-            content= header,
+            content= content_column,
             alignment= ft.alignment.bottom_center
         )
 
         self.outline = PokedexTopShape(color=color, width_ratio = width_page_ratio)
         
+        self._default_animation = ft.Animation(500, ft.AnimationCurve.EASE)
         self.structure = ft.Stack([
             self.outline,
             self.invisi_container
         ],
-        animate_position = ft.Animation(500, ft.AnimationCurve.LINEAR),
+        animate_position = self._default_animation,
         top= 0
         )
 
@@ -176,6 +227,17 @@ class TopNavigationPokedex(ft.Container):
             content= ft.Text("This is TopNavigationPokedex placeholder"),
             height= 50
         )
+
+    def sync_queries(self, e):
+        if e.control == self.query_field:
+            self.input_box.value = self.query_field.value
+            self.input_box.update()
+        else:
+            self.query_field.value = self.input_box.value
+            self.query_field.update()
+
+    def show_hide_expand_query(self):
+        self.query_field_prefix.visible = not self.query_field_prefix.visible
 
     def show_query_field(self, query: Optional[str] = None):
         self.query_field.value = query
@@ -220,20 +282,41 @@ class TopNavigationPokedex(ft.Container):
         self.page.on_resized = combined_handler
 
     def will_unmount(self):
+        self.stop_vibrate()
         if self.previous_handler:
             self.page.on_resized = self.previous_handler
         self.page.overlay.remove(self.structure)
         self.page.update()
 
-    def _animate_scrolling(self, target_position: float):
-        """
-        Target position is relative to the page
-        if you wish to call this animation, write another code that calls for self.on_animation_end at the end of the animation
-        (it has to be a different function to avoid conflicts with animate_open_close)
-        """
-        target_position = self.page.height * target_position
+    def _animate_scrolling(self, target_position: int):
         self.structure.top = target_position
         self.structure.update()
+            
+    async def _vibrate_process(self, amplitude: float = 1.0, frequency: float = 0.05):
+        """
+        Simulates vibration by oscillating around the initial top position.
+        `amplitude`: pixel displacement up/down.
+        `frequency`: time in seconds between oscillations.
+        """
+        self.structure.animate_position = ft.Animation(50, ft.AnimationCurve.LINEAR)
+
+        direction = 1
+        while True:
+            self.structure.top = direction * amplitude
+            self.structure.update()
+            direction *= -1
+            await asyncio.sleep(frequency)
+
+    
+    def start_vibrate(self):
+        self._vibrating = self.page.run_task(self._vibrate_process)
+
+    def stop_vibrate(self):
+        if self._vibrating:
+            self._vibrating.cancel()
+            self.structure.top = 0
+            self.structure.update()
+            self._vibrating = None
 
     def animate_open_close(
             self,
@@ -242,12 +325,10 @@ class TopNavigationPokedex(ft.Container):
             on_half_animation : Optional[callable] = None
         ):
         """
+        target position is proportional to page
         Moves structure to `target_position`, waits for `delay_ms`,
         then animates back to 0.
         """
-
-        # Ensure animate_position is set
-        self.structure.animate_position = ft.Animation(500, ft.AnimationCurve.EASE_IN_OUT)
 
         async def delayed_return(_):
             if on_half_animation:
@@ -262,7 +343,25 @@ class TopNavigationPokedex(ft.Container):
         self.structure.on_animation_end = lambda e: self.page.run_task(delayed_return, e)
 
         # Start animation
+        target_position = target_position * self.page.height
         self._animate_scrolling(target_position)
+
+    def processing_query_animation(self):
+        """
+        Lights up buttons, shows processing.
+        """
+        self.start_vibrate()
+        self.light_0.stop_blinking()
+        self.light_0.start_blinking(frequency= 0.25)
+        time.sleep(0.15)
+        self.light_1.start_blinking(frequency= 0.5)
+        time.sleep(0.15)
+        self.light_2.start_blinking(frequency= 0.5)
+        time.sleep(0.15)
+        self.light_3.start_blinking(frequency= 0.5)
+
+        
+
 
 
 if __name__ == "__main__":
@@ -272,9 +371,12 @@ if __name__ == "__main__":
         def move(e):
             poke.show_query_field("lol")
             poke.on_animation_end = lambda _: print("finito!")
-            poke.animate_open_close(0.5, on_half_animation= lambda _: print("siamo a meta'!"))
+            poke.animate_open_close(-0.5, on_half_animation= lambda _: print("siamo a meta'!"))
+        
+        def lighting(e):
+            poke.processing_query_animation()
 
-        poke = TopNavigationPokedex(on_submit_query= move)
+        poke = TopNavigationPokedex(on_submit_query= lighting)
 
         page.add(ft.TextField(
             hint_text="insert_query",

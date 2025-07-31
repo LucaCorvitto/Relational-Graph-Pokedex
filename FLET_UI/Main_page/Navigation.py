@@ -34,7 +34,7 @@ if __name__ == "__main__":
         navigation = TopNavigationPokedex(width_page_ratio= 0.5,on_expand_query= change_route)
         starting_page = Starting_page(on_submit_query= submit_query)
         query_page = Main_structure()
-        bottom_nav = BottomPokedex()
+        bottom_nav = BottomPokedex(color= ft.Colors.LIGHT_BLUE_200)
 
         CURRENT_PAGE = starting_page
         page.spacing = 0
@@ -62,8 +62,8 @@ if __name__ == "__main__":
 
         def animate_page_change(on_half: callable, on_end: callable):
             navigation.on_animation_end = on_end
-            navigation.animate_open_close(on_half_animation= on_half)
-            bottom_nav.animate_open_close()
+            navigation.animate_open_close(on_half_animation= on_half, target_position= 0.6)
+            bottom_nav.animate_open_close(target_position= 0.1)
 
         async def route_change(e: ft.ControlEvent):
             await asyncio.sleep(0.5)

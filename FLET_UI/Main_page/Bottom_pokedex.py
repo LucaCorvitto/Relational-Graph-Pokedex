@@ -51,7 +51,7 @@ class PokedexBottomShape(cv.Canvas):
             cv.Path.LineTo(width_limit + 30, - y_offset),  # slanted corner near top-left
             cv.Path.LineTo(width_limit,  20- y_offset),       # top-left section
             cv.Path.LineTo(0, 20- y_offset),                 # very top-left corner
-            cv.Path.LineTo(0, h - y_offset),                 # bottom-left corner
+            cv.Path.LineTo(0, h/2 - y_offset) if y_offset else cv.Path.LineTo(0, h),
             cv.Path.Close(),
         ]
 
@@ -71,9 +71,9 @@ class PokedexBottomShape(cv.Canvas):
             cv.Path(
                 path_commands,
                 paint=ft.Paint(
-                    stroke_width=3,
+                    stroke_width=8,
                     style=ft.PaintingStyle.STROKE,
-                    color=ft.Colors.BLACK,
+                    color=ft.Colors.BLACK38,
                 ),
             )
         )
@@ -90,7 +90,7 @@ class PokedexBottomShape(cv.Canvas):
         )
 
         # Shadow (shift upward)
-        shadow_path = [cv.Path.MoveTo(self.width, h - self.shadow_offset)]
+        shadow_path = [cv.Path.MoveTo(self.width, - self.shadow_offset)]
         shadow_path.extend(self.draw_path(y_offset=self.shadow_offset))
 
         self.shapes.append(
