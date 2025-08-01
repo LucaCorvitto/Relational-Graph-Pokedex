@@ -26,31 +26,56 @@ class lighting_button(ft.Container):
         self.blinking = False
         self.current_frequency = 1.0
 
+        self._radius = radius
+        self.inner_border_color = border_color
+
         self.width = self.height = radius
 
-        border = ft.Border(
-            top=ft.BorderSide(width=radius / 15, color=border_color),
-            bottom=ft.BorderSide(width=radius / 15, color=border_color),
-            left=ft.BorderSide(width=radius / 15, color=border_color),
-            right=ft.BorderSide(width=radius / 15, color=border_color),
-        )
+        self.inner_border = self.create_border(radius= radius, border_color=border_color)
 
         self.light_button = ft.Container(
             width=radius,
             height=radius,
             bgcolor=color,
-            border=border,
+            border=self.inner_border,
             border_radius=100
         )
 
         self.light_color = color
-        self.reflection = get_shperical_reflection(radius)
+        self.reflection = cv.Canvas(
+            [get_shperical_reflection(radius)],
+            width=float("inf"),
+            expand=True
+        )
 
         self.content = ft.Stack([
             self.light_button,
             self.reflection
         ])
 
+    def create_border(self, radius, border_color) -> ft.Border:
+        return ft.Border(
+            top=ft.BorderSide(width=radius / 15, color=border_color),
+            bottom=ft.BorderSide(width=radius / 15, color=border_color),
+            left=ft.BorderSide(width=radius / 15, color=border_color),
+            right=ft.BorderSide(width=radius / 15, color=border_color),
+        )
+
+    @property
+    def radius(self):
+        return self._radius
+    
+    @radius.setter
+    def radius(self, value: int):
+        self._radius = value
+        self.light_button.height = value
+        self.light_button.width = value
+        self.height = value
+        self.width = value
+        self.inner_border = self.create_border(value, self.inner_border_color)
+        self.reflection.shapes = [get_shperical_reflection(value)]
+        self.reflection.update()
+        
     async def _blink(self):
         while True:
             await asyncio.sleep(self.current_frequency)

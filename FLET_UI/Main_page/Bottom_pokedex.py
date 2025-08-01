@@ -147,7 +147,7 @@ class BottomPokedex(ft.Stack):
             bgcolor= ft.Colors.with_opacity(0, "black"),
             padding= 10,
             content= header,
-            alignment= ft.alignment.top_right
+            alignment= ft.alignment.bottom_right
         )
 
         self.outline = PokedexBottomShape(color=color, width_ratio = self.width_page_ratio)
@@ -178,22 +178,20 @@ class BottomPokedex(ft.Stack):
 
     def did_mount(self):
         self._update_children()
-        # Chain on_resized handlers
-        self.previous_handler = self.page.on_resized
 
+        # Chain on_resized handlers
+        if getattr(self, "_handler_attached", False):
+            return
+        self._previous_handler = self.page.on_resized
+        self._handler_attached : bool = False
         def combined_handler(e):
             self._update_children(e)
-            if self.previous_handler:
-                self.previous_handler(e)
+            if self._previous_handler:
+                self._previous_handler(e)
 
         self.page.on_resized = combined_handler
-
-    def will_unmount(self):
-        if self.previous_handler:
-            self.page.on_resized = self.previous_handler
-        self.page.update()
-
-    
+        self._handler_attached = True
+        
     def _animate_scrolling(self, target_position: float):
         """
         Target position is relative to the page
