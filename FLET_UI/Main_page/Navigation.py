@@ -9,7 +9,7 @@ parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')
 sys.path.insert(0, parent_dir)
 
 from FLET_UI.Main_page.starting_page import Starting_page
-from FLET_UI.Main_page.Top_navigation import TopNavigationPokedex
+from FLET_UI.Main_page.Top_navigation_Pokedex import TopNavigationPokedex
 from FLET_UI.Main_page.Bottom_pokedex import BottomPokedex
 from FLET_UI.Main_page.visual_page import Main_structure
 

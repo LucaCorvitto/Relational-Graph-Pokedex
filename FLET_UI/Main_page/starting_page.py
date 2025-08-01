@@ -11,7 +11,7 @@ sys.path.insert(0, parent_dir)
 
 from FLET_UI.Custom_elements.text_decorator import Text_decorator
 from FLET_UI.Main_page.lighting_button import lighting_button
-from FLET_UI.Main_page.Top_navigation import TopNavigationPokedex
+from FLET_UI.Main_page.Top_navigation_Pokedex import TopNavigationPokedex
 
 
 class Starting_page(ft.Container):

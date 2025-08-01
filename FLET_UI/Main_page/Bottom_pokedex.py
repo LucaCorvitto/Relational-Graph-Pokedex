@@ -115,7 +115,6 @@ class BottomPokedex(ft.Stack):
             color : Optional[ft.Colors] = "red",
             height_page_ratio : float = 1/8,
             width_page_ratio : float = 1/2,
-            overlap : int = 25,
         ):
 
         self.previous_handler = None #used in did_mount
@@ -129,8 +128,6 @@ class BottomPokedex(ft.Stack):
         self.min_height = 80
         self.height_page_ratio = height_page_ratio
         self.width_page_ratio = width_page_ratio
-
-        self.overlap = overlap
         
         self.title = Text_decorator(title)
 
@@ -156,7 +153,7 @@ class BottomPokedex(ft.Stack):
             self.outline,
             self.invisi_container
         ],
-        bottom= 0,
+        bottom= 13,
         alignment= ft.alignment.top_right,
         animate_position = ft.Animation(500, ft.AnimationCurve.LINEAR),
         )
@@ -168,7 +165,7 @@ class BottomPokedex(ft.Stack):
 
         width = self.page.width
 
-        self.outline.draw_zigzag(width= width, height= height + self.overlap)
+        self.outline.draw_zigzag(width= width, height= height)
         self.outline.update()
         self.invisi_container.width = width
         self.invisi_container.height = height

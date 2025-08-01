@@ -7,7 +7,7 @@ import os
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 sys.path.insert(0, parent_dir)
 
-from FLET_UI.Main_page.Top_navigation import TopNavigationPokedex
+from FLET_UI.Main_page.Top_navigation_Pokedex import TopNavigationPokedex
 
 class Main_structure(ft.Container):
     def __init__(self):
@@ -17,7 +17,6 @@ class Main_structure(ft.Container):
             ft.Row([
                 ft.Column(
                     [
-                        ft.Divider(),
                         ft.Container(width= 120, height=180, bgcolor="red"),
                         ft.Container(width=120, height=180, bgcolor="red"),
                         ft.Container(width=120, height=180, bgcolor="red"),

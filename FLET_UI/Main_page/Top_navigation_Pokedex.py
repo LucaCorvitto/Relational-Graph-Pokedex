@@ -183,14 +183,17 @@ class TopNavigationPokedex(ft.Container):
                 horizontal_alignment= ft.CrossAxisAlignment.CENTER
                 ),
             expand = True,
-            padding= 50,
+            padding= 20,
             visible= self.expanded_view
         )
+
+        spacer = ft.Divider(height= self.overlap/2, opacity=0)
 
         content_column = ft.Column(
             controls=[
                 self.upper_view,
-                self.header
+                self.header,
+                spacer
             ],
             alignment= ft.MainAxisAlignment.END
         )
@@ -216,7 +219,6 @@ class TopNavigationPokedex(ft.Container):
 
         super().__init__(
             content= ft.Text("This is TopNavigationPokedex placeholder"),
-            height= 50
         )
 
     def create_expanded_body(self):
@@ -275,6 +277,8 @@ class TopNavigationPokedex(ft.Container):
             return
         
         self.rescale_light_buttons(0.8)
+        self.upper_view.padding = 10
+        self.upper_view.update()
         self.invisi_divider.visible = False
         self.invisi_divider.update()
         self._scale_reduced = True
@@ -287,6 +291,8 @@ class TopNavigationPokedex(ft.Container):
             return
         
         self.rescale_light_buttons(1.25)
+        self.upper_view.padding = 20
+        self.upper_view.update()
         self.invisi_divider.visible = True
         self.invisi_divider.update()
         self._scale_reduced = False
@@ -304,10 +310,10 @@ class TopNavigationPokedex(ft.Container):
         else:
             self._restore_scale()
 
-        self.height = height
-        self.outline.draw_zigzag(width= self.width, height= self.height + self.overlap)
+        self.height = height - self.overlap
+        self.outline.draw_zigzag(width= self.width, height= height)
         self.outline.update()
-        self.invisi_container.height = self.height
+        self.invisi_container.height = height
         self.invisi_container.width = self.width
         self.invisi_container.update()
         self.update()

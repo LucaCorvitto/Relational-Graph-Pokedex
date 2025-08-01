@@ -33,7 +33,7 @@ if __name__ == "__main__":
 
         poke = TopNavigationPokedex(on_submit_query= lighting, height_page_ratio= 4/5)
 
-        page.overlay.append(BottomPokedex(height_page_ratio=1/5, color="blue"))
+        page.overlay.append(BottomPokedex(height_page_ratio=1/5, color="white"))
 
         page.add(poke)
         
