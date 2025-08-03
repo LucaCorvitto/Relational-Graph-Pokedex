@@ -1,8 +1,5 @@
-import asyncio
-import time
 from typing import Optional
 import flet as ft
-import flet.canvas as cv
 
 import sys
 import os

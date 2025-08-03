@@ -86,10 +86,10 @@ class CustomLog:
         }
 
         os.makedirs(self.base_dir, exist_ok=True)
-
         if clear_logs:
-            # Clear all .txt files in the logs directory
-            for file in glob.glob(os.path.join(self.base_dir, "*.txt")):
+            # Only clear log files that match the base_filename pattern
+            pattern = os.path.join(self.base_dir, f"{self.base_filename}_*.txt")
+            for file in glob.glob(pattern):
                 with open(file, "w") as f:
                     f.write("")
 
@@ -192,7 +192,7 @@ class CustomLog:
 CUSTOM_LOG : CustomLog | None = None
 
 def init_log(
-        base_dir = ".",
+        base_dir = "logs",
         base_filename = "log",
         clear_logs = True,
         print_debug = True,

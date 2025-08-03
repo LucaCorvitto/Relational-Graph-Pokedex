@@ -14,6 +14,7 @@ sys.path.insert(0, parent_dir)
 from FLET_UI.Custom_elements.text_decorator import Text_decorator
 from FLET_UI.Custom_elements.lighten_color import lighten_color
 from FLET_UI.Main_page.lighting_button import lighting_button
+from FLET_UI.Main_page.Pokedex_screen import Pokedex_screen
 
 #POKEDEX SHAPE------------------------------------------------------
 class PokedexTopShape(cv.Canvas):
@@ -149,16 +150,12 @@ class TopNavigationPokedex(ft.Container):
 
         self.query_field_prefix = ft.IconButton(ft.Icons.EXPAND, on_click= on_expand_query, visible=False)
 
-        self.query_field = ft.TextField(
-            hint_text="previous_query",
-            suffix= ft.IconButton(ft.Icons.SEND, on_click= self.on_submit_query),
+        self.query_field = Pokedex_screen(
+            on_submit= self.on_submit_query,
             prefix= self.query_field_prefix,
-            bgcolor= ft.Colors.GREY_300,
-            multiline= True,
-            height= 55,
+            height= 70,
             on_change= self.sync_queries,
-            expand= True
-            )
+        )
         
         self.invisi_divider = ft.VerticalDivider(width= 70, opacity= 0)
         self.header = ft.Row(
@@ -242,18 +239,18 @@ class TopNavigationPokedex(ft.Container):
         )
 
     def sync_queries(self, e):
-        if e.control == self.query_field:
-            self.input_box.value = self.query_field.value
+        if e.control == self.query_field.text_screen:
+            self.input_box.value = self.query_field.text_screen.value
             self.input_box.update()
         else:
-            self.query_field.value = self.input_box.value
-            self.query_field.update()
+            self.query_field.text_screen.value = self.input_box.value
+            self.query_field.text_screen.update()
 
     def show_hide_expand_query(self):
         self.query_field_prefix.visible = not self.query_field_prefix.visible
 
     def show_query_field(self, query: Optional[str] = None):
-        self.query_field.value = query
+        self.query_field.text_screen.value = query
         self.query_field.visible = True
         self.query_field.update()
     
@@ -423,7 +420,6 @@ if __name__ == "__main__":
 
         # This triggers after did_mount has placed structure in overlay
         def move(e):
-            poke.show_query_field("lol")
             poke.on_animation_end = lambda _: print("finito!")
             poke.animate_open_close(0.5, on_half_animation= lambda _: print("siamo a meta'!"))
 
