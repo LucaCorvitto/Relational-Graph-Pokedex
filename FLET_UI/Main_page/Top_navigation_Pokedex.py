@@ -153,7 +153,7 @@ class TopNavigationPokedex(ft.Container):
         self.query_field = Pokedex_screen(
             on_submit= self.on_submit_query,
             prefix= self.query_field_prefix,
-            height= 70,
+            height= 50,
             on_change= self.sync_queries,
         )
         

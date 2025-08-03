@@ -19,7 +19,7 @@ class Pokedex_screen(ft.Container):
             text_color = "green",
             background_color = "black",
             frame_color = "grey",
-            padding = 10,
+            padding = 5,
             on_submit : Optional[callable] = None,
             prefix: Optional[ft.Control] = None,
             height : int = 70,
@@ -55,7 +55,7 @@ class Pokedex_screen(ft.Container):
 
         self.text_screen = ft.TextField(
             bgcolor= background_color,
-            text_style= ft.TextStyle(font_family= "fira_mono", color=text_color),
+            text_style= ft.TextStyle(font_family= "fira_mono", color=text_color, size= height/4),
             border_color= background_color,
             suffix = ft.IconButton("send", icon_color= text_color, on_click= process),
             prefix= self.prefix,
