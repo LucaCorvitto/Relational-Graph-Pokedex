@@ -15,6 +15,7 @@ from FLET_UI.Custom_elements.text_decorator import Text_decorator
 from FLET_UI.Custom_elements.lighten_color import lighten_color
 from FLET_UI.Main_page.lighting_button import lighting_button
 from FLET_UI.Main_page.Pokedex_screen import Pokedex_screen
+from FLET_UI.Main_page.input_box import PokeballInput
 
 #POKEDEX SHAPE------------------------------------------------------
 class PokedexTopShape(cv.Canvas):
@@ -168,7 +169,7 @@ class TopNavigationPokedex(ft.Container):
             vertical_alignment= ft.CrossAxisAlignment.END,
         )
         
-        self.input_box = ft.Divider(visible=False)
+        self.input_box = ft.Divider(visible=False) #this is only a placeholder
         self.description_box = ft.Divider(visible=False)
 
         if self.expanded_view:
@@ -219,13 +220,10 @@ class TopNavigationPokedex(ft.Container):
         )
 
     def create_expanded_body(self):
-        self.input_box = ft.TextField(
+        self.input_box = PokeballInput(
             hint_text= "Insert here your query",
-            multiline= True,
             bgcolor= lighten_color(self.color),
-            expand_loose= True,
-            suffix= ft.IconButton(ft.Icons.SEND, on_click= self.on_submit_query),
-            max_lines= 4,
+            on_submit= self.on_submit_query,
             on_change= self.sync_queries,
         )
 
