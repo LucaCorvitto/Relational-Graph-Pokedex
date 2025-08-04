@@ -1,32 +1,38 @@
-import flet as ft
-import flet.canvas as cv
+from flet import Paint, PaintingStyle, Colors
+from flet.canvas import Path
 
-def get_shperical_reflection(radius):
+def get_shperical_reflection(radius : int) -> Path:
+    """
+    Creates a reflecton for a sphere/hemisphere of radius RADIUS
+    returns a Path to be used for a Canvas
+    """
 
     starting_point = radius*0.2
 
-    return cv.Path(
+    return Path(
                 [
-                    cv.Path.MoveTo(starting_point, starting_point),
-                    cv.Path.QuadraticTo(starting_point*2, starting_point/5, starting_point*3, starting_point/2, 0.5),
-                    cv.Path.QuadraticTo(starting_point/2, starting_point, starting_point/2, starting_point*3, 0.8),
-                    cv.Path.QuadraticTo(starting_point/5, starting_point, starting_point, starting_point, 0.5),
+                    Path.MoveTo(starting_point, starting_point),
+                    Path.QuadraticTo(starting_point*2, starting_point/5, starting_point*3, starting_point/2, 0.5),
+                    Path.QuadraticTo(starting_point/2, starting_point, starting_point/2, starting_point*3, 0.8),
+                    Path.QuadraticTo(starting_point/5, starting_point, starting_point, starting_point, 0.5),
                 ],
-                paint=ft.Paint(
+                paint=Paint(
                     stroke_width=2,
-                    style=ft.PaintingStyle.FILL,
-                    color=ft.Colors.with_opacity(0.5, ft.Colors.WHITE),
+                    style=PaintingStyle.FILL,
+                    color=Colors.with_opacity(0.5, Colors.WHITE),
                 ),
             )
 
 if __name__ == "__main__":
-    def main(page: ft.Page):
+    from flet import Page, app
+    from flet.canvas import Canvas
+    def main(page: Page):
 
-        page.window.width = 150
-        page.window.height = 150
-        page.bgcolor = "grey"
+        page.window.width = 300
+        page.window.height = 300
+        page.bgcolor = "black"
         page.add(
-            cv.Canvas(
+            Canvas(
                 [get_shperical_reflection(200)],
             
             width=float("inf"),
@@ -34,4 +40,4 @@ if __name__ == "__main__":
             )
         )
 
-    ft.app(main)
+    app(main)

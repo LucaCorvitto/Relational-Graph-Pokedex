@@ -1,8 +1,11 @@
 import asyncio
 import time
 from typing import Optional
+from flet import (
+    Container, Colors, Row, Column, Stack, Divider, IconButton, Icons, Divider, VerticalDivider,
+    MainAxisAlignment, CrossAxisAlignment, Animation, AnimationCurve, alignment, Text
+)
 import flet as ft
-import flet.canvas as cv
 
 import sys
 import os
@@ -16,98 +19,16 @@ from FLET_UI.Custom_elements.lighten_color import lighten_color
 from FLET_UI.Main_page.lighting_button import lighting_button
 from FLET_UI.Main_page.Pokedex_screen import Pokedex_screen
 from FLET_UI.Main_page.input_box import PokeballInput
+from FLET_UI.Main_page.Poke_shape import PokedexShape
 
-#POKEDEX SHAPE------------------------------------------------------
-class PokedexTopShape(cv.Canvas):
-    def __init__(
-            self,
-            color: ft.Colors = "blue",
-            width_ratio : float = 1/2,
-            width = 80,
-            heigth = 80,
-            shadow_offset: float = 5.0,
-            width_limit = 170
-        ):
-        super().__init__(expand=True)
-        
-        if width_ratio < 0 or width_ratio > 1:
-            raise ValueError("width_ratio must be between 0 and 1")
-        self.shadow_offset = shadow_offset
-        self.color = color
-        self.heigth = heigth
-        self.width = width
-        self.width_ratio = width_ratio
+class TopNavigationPokedex(Container):
+    MIN_HEIGHT_HIDE_BODY = 80
+    MIN_HEIGHT_SHOW_BODY = 350
 
-        #this limit is needed to keep the space for the lights.
-        #set it to 0 to turn it off.
-        self.width_limit = width_limit
-
-    def draw_path(self, y_offset=0):
-
-        if self.width_limit >0:
-            width = self.width * self.width_ratio if self.width * self.width_ratio > self.width_limit else self.width_limit
-
-        return [
-            cv.Path.LineTo(0, self.height + y_offset),
-            cv.Path.LineTo(width, self.height + y_offset),
-            cv.Path.LineTo((width) +30, self.height -20 + y_offset),
-            cv.Path.LineTo(self.width, self.height -20 + y_offset),
-            cv.Path.LineTo(self.width, -self.height/2 + y_offset) if y_offset else cv.Path.LineTo(self.width, -self.height*5),
-            cv.Path.Close(),
-        ]
-
-    def draw_zigzag(self, width, height, e=None):
-        self.shapes = []
-
-        self.width = width
-        self.height = height
-
-        # Main shape
-        path_commands = [cv.Path.MoveTo(0, -self.height*5)]
-        path_commands.extend(self.draw_path())
-
-        self.shapes.append(
-            cv.Path(
-                path_commands,
-                paint=ft.Paint(
-                    stroke_width=8,
-                    style=ft.PaintingStyle.STROKE,
-                    color=ft.Colors.BLACK38,
-                ),
-            )
-        )
-
-        self.shapes.append(
-            cv.Path(
-                path_commands,
-                paint=ft.Paint(
-                    style=ft.PaintingStyle.FILL,
-                    color=self.color,
-                ),
-            )
-        )
-
-        # Shadow
-        shadow_path = [cv.Path.MoveTo(0, self.height *9/10 + self.shadow_offset)]
-        shadow_path.extend(self.draw_path(y_offset=self.shadow_offset))  # FIXED HERE
-
-        self.shapes.append(
-            cv.Path(
-                shadow_path,
-                paint=ft.Paint(
-                    style=ft.PaintingStyle.FILL,
-                    color=ft.Colors.with_opacity(0.2, ft.Colors.BLACK),
-                ),
-            )
-        )
-
-#=============================================================================================
-
-class TopNavigationPokedex(ft.Container):
     def  __init__(
             self,
             title: Optional[str] = "Pokedex",
-            color : Optional[ft.Colors] = "red",
+            color : Optional[Colors] = "red",
             height_page_ratio : float = 1/8,
             width_page_ratio : float = 1/2,
             overlap : int = 25,
@@ -122,7 +43,7 @@ class TopNavigationPokedex(ft.Container):
         if width_page_ratio < 0 or width_page_ratio > 1:
             raise ValueError("width_page_ratio must be between 0 and 1")
 
-        self.min_height = 350 if expanded_view else 80
+        self.min_height = TopNavigationPokedex.MIN_HEIGHT_SHOW_BODY if expanded_view else TopNavigationPokedex.MIN_HEIGHT_HIDE_BODY
         self.height_page_ratio = height_page_ratio
         self.width_page_ratio = width_page_ratio
 
@@ -139,8 +60,8 @@ class TopNavigationPokedex(ft.Container):
         self.light_2 = lighting_button(25, "orange")
         self.light_3 = lighting_button(25, "green")
 
-        self.light_buttons = ft.Row( [
-            ft.Divider(),
+        self.light_buttons = Row( [
+            Divider(),
             self.light_0,
             self.light_1,
             self.light_2,
@@ -149,7 +70,7 @@ class TopNavigationPokedex(ft.Container):
         
         self.title = Text_decorator(title)
 
-        self.query_field_prefix = ft.IconButton(ft.Icons.EXPAND, on_click= on_expand_query, visible=False)
+        self.query_field_prefix = IconButton(Icons.EXPAND, on_click= on_expand_query, visible=False)
 
         self.query_field = Pokedex_screen(
             on_submit= self.on_submit_query,
@@ -158,56 +79,56 @@ class TopNavigationPokedex(ft.Container):
             on_change= self.sync_queries,
         )
         
-        self.invisi_divider = ft.VerticalDivider(width= 70, opacity= 0)
-        self.header = ft.Row(
+        self.invisi_divider = VerticalDivider(width= 70, opacity= 0)
+        self.header = Row(
             [
                 self.light_buttons,
                 self.invisi_divider,
                 self.query_field
             ],
-            alignment= ft.MainAxisAlignment.SPACE_BETWEEN,
-            vertical_alignment= ft.CrossAxisAlignment.END,
+            alignment= MainAxisAlignment.SPACE_BETWEEN,
+            vertical_alignment= CrossAxisAlignment.END,
         )
         
-        self.input_box = ft.Divider(visible=False) #this is only a placeholder
-        self.description_box = ft.Divider(visible=False)
+        self.input_box = Divider(visible=False) #this is only a placeholder
+        self.description_box = Divider(visible=False)
 
         if self.expanded_view:
             self.create_expanded_body()
 
-        self.upper_view = ft.Container(
-            ft.Column(
+        self.upper_view = Container(
+            Column(
                 [self.title, self.input_box, self.description_box],
-                horizontal_alignment= ft.CrossAxisAlignment.CENTER
+                horizontal_alignment= CrossAxisAlignment.CENTER
                 ),
             expand = True,
             padding= 20,
             visible= self.expanded_view
         )
 
-        spacer = ft.Divider(height= self.overlap/2, opacity=0)
+        spacer = Divider(height= self.overlap/2, opacity=0)
 
-        content_column = ft.Column(
+        content_column = Column(
             controls=[
                 self.upper_view,
                 self.header,
                 spacer
             ],
-            alignment= ft.MainAxisAlignment.END
+            alignment= MainAxisAlignment.END
         )
 
-        self.invisi_container = ft.Container(
-            height=80,
-            bgcolor= ft.Colors.with_opacity(0, "black"),
+        self.invisi_container = Container(
+            height=TopNavigationPokedex.MIN_HEIGHT_HIDE_BODY,
+            bgcolor= Colors.with_opacity(0, "black"),
             padding= 10,
             content= content_column,
-            alignment= ft.alignment.bottom_center
+            alignment= alignment.bottom_center
         )
 
-        self.outline = PokedexTopShape(color=color, width_ratio = width_page_ratio)
+        self.outline = PokedexShape(color=color, width_ratio = width_page_ratio)
         
-        self._default_animation = ft.Animation(500, ft.AnimationCurve.EASE)
-        self.structure = ft.Stack([
+        self._default_animation = Animation(500, AnimationCurve.EASE)
+        self.structure = Stack([
             self.outline,
             self.invisi_container
         ],
@@ -216,7 +137,7 @@ class TopNavigationPokedex(ft.Container):
         )
 
         super().__init__(
-            content= ft.Text("This is TopNavigationPokedex placeholder"),
+            content= Text("This is TopNavigationPokedex placeholder"),
         )
 
     def create_expanded_body(self):
@@ -227,8 +148,8 @@ class TopNavigationPokedex(ft.Container):
             on_change= self.sync_queries,
         )
 
-        self.description_box = ft.Container(
-            content= ft.Text("This is a test description", selectable= True),
+        self.description_box = Container(
+            content= Text("This is a test description", selectable= True),
             bgcolor= lighten_color(self.color),
             padding=10,
             margin=10,
@@ -292,26 +213,37 @@ class TopNavigationPokedex(ft.Container):
         self.invisi_divider.update()
         self._scale_reduced = False
 
-    def _update_children(self, e = None):
-        height = self.page.height * self.height_page_ratio
+    def _update_children(self, e=None):
+        if not self.page:
+            return
 
-        height = height if height > self.min_height else self.min_height
+        if self.upper_view.visible:
+            height = self.page.height * self.height_page_ratio
+            height = max(height, self.min_height)
+        else:
+            # Minimized height when body is hidden
+            height = TopNavigationPokedex.MIN_HEIGHT_HIDE_BODY + self.overlap  # header height + overlap
 
         self.width = self.page.width
+        self.height = height - self.overlap
 
-        #reduce size of buttons if page width is small (responsive UI)
-        if self.width <350:
+        # Reduce button size on small screens (responsive UI)
+        if self.width < 350:
             self._reduce_scale()
         else:
             self._restore_scale()
 
-        self.height = height - self.overlap
-        self.outline.draw_zigzag(width= self.width, height= height)
+        # Redraw shape
+        self.outline.draw_zigzag(width=self.width, height=height)
         self.outline.update()
+
+        # Update the invisible container dimensions
         self.invisi_container.height = height
         self.invisi_container.width = self.width
         self.invisi_container.update()
+
         self.update()
+
 
     def did_mount(self):
         #make sure the control is at the top of the page
@@ -351,7 +283,7 @@ class TopNavigationPokedex(ft.Container):
         `amplitude`: pixel displacement up/down.
         `frequency`: time in seconds between oscillations.
         """
-        self.structure.animate_position = ft.Animation(50, ft.AnimationCurve.LINEAR)
+        self.structure.animate_position = Animation(50, AnimationCurve.LINEAR)
 
         direction = 1
         while True:
@@ -399,11 +331,29 @@ class TopNavigationPokedex(ft.Container):
         target_position = target_position * self.page.height
         self._animate_scrolling(target_position)
 
+    def hide_body(self):
+        def hide_upper_view(e):
+            self.upper_view.visible = False
+            self.upper_view.update()
+        self.min_height = TopNavigationPokedex.MIN_HEIGHT_HIDE_BODY
+        target_position = -(self.height) + self.min_height
+        self.structure.on_animation_end = hide_upper_view
+        self._animate_scrolling(target_position)
+        
+
+    def show_body(self):
+        self.upper_view.visible = True
+        self.upper_view.update()
+        self.min_height = TopNavigationPokedex.MIN_HEIGHT_SHOW_BODY
+        target_position = self.height
+        self._animate_scrolling(target_position)
+
     def processing_query_animation(self):
         """
         Lights up buttons, shows processing.
         """
-        self.start_vibrate()
+        if isinstance(self.input_box , PokeballInput):
+            self.input_box.button.start_rotating()
         self.light_0.stop_blinking()
         self.light_0.start_blinking(frequency= 0.25)
         time.sleep(0.15)
@@ -412,22 +362,34 @@ class TopNavigationPokedex(ft.Container):
         self.light_2.start_blinking(frequency= 0.5)
         time.sleep(0.15)
         self.light_3.start_blinking(frequency= 0.5)
+        
 
 if __name__ == "__main__":
-    def main(page: ft.Page):
+    from flet import Page, TextField, app
+    def main(page: Page):
+
+        hidden = False
 
         # This triggers after did_mount has placed structure in overlay
         def move(e):
-            poke.on_animation_end = lambda _: print("finito!")
-            poke.animate_open_close(0.5, on_half_animation= lambda _: print("siamo a meta'!"))
+            
+            nonlocal hidden
+            if hidden:
+                poke.on_animation_end = poke.show_body()
+                poke.animate_open_close(0.5)
+                hidden = False
+            else:
+                poke.on_animation_end = lambda _: poke.hide_body()
+                poke.animate_open_close(0.5)
+                hidden = True
 
         poke = TopNavigationPokedex(on_submit_query= move)
 
-        page.add(ft.TextField(
+        page.add(TextField(
             hint_text="insert_query",
             on_submit=move
         ))
 
         page.add(poke)
 
-    ft.app(target=main)
+    app(target=main)

@@ -1,7 +1,9 @@
 import asyncio
 from typing import Optional
-import flet as ft
-import flet.canvas as cv
+from flet import (
+    Stack, Animation, AnimationCurve, Colors, Row, MainAxisAlignment, Container,
+    alignment
+)
 
 import sys
 import os
@@ -11,108 +13,16 @@ parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')
 sys.path.insert(0, parent_dir)
 
 from FLET_UI.Custom_elements.text_decorator import Text_decorator
+from FLET_UI.Main_page.Poke_shape import PokedexShape
 
-#POKEDEX SHAPE------------------------------------------------------
-class PokedexBottomShape(cv.Canvas):
-    def __init__(
-            self,
-            color: ft.Colors = "blue",
-            width_ratio = 2/3,
-            width=80,
-            heigth=80,
-            shadow_offset: float = 5.0,
-            width_limit=170,
-        ):
-        super().__init__(expand=True)
-        if width_ratio < 0 or width_ratio > 1:
-            raise ValueError("width_ratio must be between 0 and 1")
-
-        self.shadow_offset = shadow_offset
-        self.color = color
-        self.heigth = heigth
-        self.width = width
-        self.width_limit = width_limit
-        self.width_ratio = width_ratio
-
-    def draw_path(self, y_offset=0):
-        """
-        Build the polygon path starting from the bottom and going upward.
-        """
-        if self.width_limit > 0:
-            width_limit = self.width *self.width_ratio if self.width *self.width_ratio > self.width_limit else self.width_limit
-        else:
-            width_limit = 0
-
-        h = self.height * 5
-
-        return [
-            # from bottom-right, move left
-            cv.Path.LineTo(self.width, - y_offset),  # top-right corner
-            cv.Path.LineTo(width_limit + 30, - y_offset),  # slanted corner near top-left
-            cv.Path.LineTo(width_limit,  20- y_offset),       # top-left section
-            cv.Path.LineTo(0, 20- y_offset),                 # very top-left corner
-            cv.Path.LineTo(0, h/2 - y_offset) if y_offset else cv.Path.LineTo(0, h),
-            cv.Path.Close(),
-        ]
-
-    def draw_zigzag(self, width, height, e=None):
-        self.shapes = []
-        self.width = width
-        self.height = height
-
-        h = self.height * 5
-
-        # Start from bottom-right
-        path_commands = [cv.Path.MoveTo(self.width, h)]
-        path_commands.extend(self.draw_path())
-
-        # Outline
-        self.shapes.append(
-            cv.Path(
-                path_commands,
-                paint=ft.Paint(
-                    stroke_width=8,
-                    style=ft.PaintingStyle.STROKE,
-                    color=ft.Colors.BLACK38,
-                ),
-            )
-        )
-
-        # Fill
-        self.shapes.append(
-            cv.Path(
-                path_commands,
-                paint=ft.Paint(
-                    style=ft.PaintingStyle.FILL,
-                    color=self.color,
-                ),
-            )
-        )
-
-        # Shadow (shift upward)
-        shadow_path = [cv.Path.MoveTo(self.width, - self.shadow_offset)]
-        shadow_path.extend(self.draw_path(y_offset=self.shadow_offset))
-
-        self.shapes.append(
-            cv.Path(
-                shadow_path,
-                paint=ft.Paint(
-                    style=ft.PaintingStyle.FILL,
-                    color=ft.Colors.with_opacity(0.2, ft.Colors.BLACK),
-                ),
-            )
-        )
-
-#=============================================================================================
-
-class BottomPokedex(ft.Stack):
+class BottomPokedex(Stack):
     """
     Make sure to append this on the page overlay.
     """
     def  __init__(
             self,
             title: Optional[str] = "Pokedex",
-            color : Optional[ft.Colors] = "red",
+            color : Optional[Colors] = "red",
             height_page_ratio : float = 1/8,
             width_page_ratio : float = 1/2,
         ):
@@ -131,31 +41,31 @@ class BottomPokedex(ft.Stack):
         
         self.title = Text_decorator(title)
 
-        header = ft.Row(
+        header = Row(
             [
                 self.title,
             ],
-            alignment= ft.MainAxisAlignment.END,
+            alignment= MainAxisAlignment.END,
             expand=True
         )
 
-        self.invisi_container = ft.Container(
+        self.invisi_container = Container(
             height=80,
-            bgcolor= ft.Colors.with_opacity(0, "black"),
+            bgcolor= Colors.with_opacity(0, "black"),
             padding= 10,
             content= header,
-            alignment= ft.alignment.bottom_right
+            alignment= alignment.bottom_right
         )
 
-        self.outline = PokedexBottomShape(color=color, width_ratio = self.width_page_ratio)
+        self.outline = PokedexShape(color=color, width_ratio = self.width_page_ratio, flipped= True)
         
         super().__init__([
             self.outline,
             self.invisi_container
         ],
         bottom= 13,
-        alignment= ft.alignment.top_right,
-        animate_position = ft.Animation(500, ft.AnimationCurve.LINEAR),
+        alignment= alignment.top_right,
+        animate_position = Animation(500, AnimationCurve.LINEAR),
         )
 
     def _update_children(self, e = None):
@@ -210,7 +120,7 @@ class BottomPokedex(ft.Stack):
         then animates back to 0.
         """
         # Ensure animate_position is set
-        self.animate_position = ft.Animation(500, ft.AnimationCurve.EASE_IN_OUT)
+        self.animate_position = Animation(500, AnimationCurve.EASE_IN_OUT)
 
         async def delayed_return(_):
             if on_half_animation:
@@ -228,10 +138,11 @@ class BottomPokedex(ft.Stack):
         self._animate_scrolling(target_position)
 
 if __name__ == "__main__":
-    def main(page: ft.Page):
+    from flet import Page, IconButton, Icons, app
+    def main(page: Page):
         poke = BottomPokedex()
-        page.add(ft.IconButton(ft.Icons.ABC, on_click= lambda _: poke.animate_open_close()))
+        page.add(IconButton(Icons.ABC, on_click= lambda _: poke.animate_open_close()))
         page.overlay.append(poke)
         page.update()
 
-    ft.app(target=main)
+    app(target=main)

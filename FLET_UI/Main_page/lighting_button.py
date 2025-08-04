@@ -1,6 +1,6 @@
 import asyncio
-import flet as ft
-import flet.canvas as cv
+from flet import Colors, Container,  Stack, Border, BorderSide
+from flet.canvas import Canvas
 
 import os, sys
 
@@ -11,12 +11,12 @@ from FLET_UI.Main_page.reflection import get_shperical_reflection
 from FLET_UI.Custom_elements.lighten_color import lighten_color
 
 
-class lighting_button(ft.Container):
+class lighting_button(Container):
     def __init__(
         self,
         radius: int,
-        color: str | ft.Colors = "grey",
-        border_color: str | ft.Colors = "white",
+        color: str | Colors = "grey",
+        border_color: str | Colors = "white",
         do_blink: bool = False
     ):
         super().__init__()
@@ -33,7 +33,7 @@ class lighting_button(ft.Container):
 
         self.inner_border = self.create_border(radius= radius, border_color=border_color)
 
-        self.light_button = ft.Container(
+        self.light_button = Container(
             width=radius,
             height=radius,
             bgcolor=color,
@@ -42,23 +42,23 @@ class lighting_button(ft.Container):
         )
 
         self.light_color = color
-        self.reflection = cv.Canvas(
+        self.reflection = Canvas(
             [get_shperical_reflection(radius)],
             width=float("inf"),
             expand=True
         )
 
-        self.content = ft.Stack([
+        self.content = Stack([
             self.light_button,
             self.reflection
         ])
 
-    def create_border(self, radius, border_color) -> ft.Border:
-        return ft.Border(
-            top=ft.BorderSide(width=radius / 15, color=border_color),
-            bottom=ft.BorderSide(width=radius / 15, color=border_color),
-            left=ft.BorderSide(width=radius / 15, color=border_color),
-            right=ft.BorderSide(width=radius / 15, color=border_color),
+    def create_border(self, radius, border_color) -> Border:
+        return Border(
+            top=BorderSide(width=radius / 15, color=border_color),
+            bottom=BorderSide(width=radius / 15, color=border_color),
+            left=BorderSide(width=radius / 15, color=border_color),
+            right=BorderSide(width=radius / 15, color=border_color),
         )
 
     @property
@@ -110,13 +110,14 @@ class lighting_button(ft.Container):
         self.stop_blinking()
 
 if __name__ == "__main__":
-    def main(page: ft.Page):
+    from flet import Page, Row, app
+    def main(page: Page):
         page.bgcolor = "grey"
-        row = ft.Row([
+        row = Row([
             lighting_button(radius= 100, color= "red", do_blink= True),
             lighting_button(radius= 50, color= "blue", border_color= "black"),
             lighting_button(radius= 50, color= "green", border_color= "black" )
         ])
         page.add(row)
 
-    ft.app(target=main)
+    app(target=main)
