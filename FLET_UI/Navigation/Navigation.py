@@ -1,4 +1,5 @@
 import asyncio
+import time
 import flet as ft
 
 import sys
@@ -25,58 +26,66 @@ if __name__ == "__main__":
             """
             insert query in e.control.data
             """
-            query :str = e.control.data
+            query :str = navigation.query_field.text_screen.value
             page.go(f"/query={query}")
 
         def change_route(e: ft.ControlEvent):
             page.go("/main_page")
 
-        navigation = TopNavigationPokedex(width_page_ratio= 0.5,on_expand_query= change_route)
-        starting_page = Starting_page(on_submit_query= submit_query)
+        navigation = TopNavigationPokedex(
+            width_page_ratio= 0.5,
+            on_expand_query= change_route,
+            on_submit_query= submit_query,
+            height_page_ratio= 4/5
+            )
+        starting_page = ft.Container(bgcolor= "green")
         query_page = Main_structure()
-        bottom_nav = BottomPokedex(color= ft.Colors.LIGHT_BLUE_200)
+        bottom_nav = BottomPokedex(color= ft.Colors.GREY_100, height_page_ratio= 1/5)
 
         CURRENT_PAGE = starting_page
         page.spacing = 0
 
-        page.add(navigation)
+        page.window.width = 351
+        page.window.height = 500
         page.overlay.append(bottom_nav)
+        page.add(navigation)
+        page.add(CURRENT_PAGE)
         page.update()
 
-        def query_page_go(query):
-            if CURRENT_PAGE == query_page:
+        def change_page(target_page):
+            global CURRENT_PAGE
+            if CURRENT_PAGE == target_page:
                 return
             page.controls.remove(CURRENT_PAGE)
-            navigation.show_query_field(query)
-            CURRENT_PAGE = query_page
-            page.add(query_page)
+            CURRENT_PAGE = target_page
+            page.add(target_page)
 
-        def main_page_go(query):
-            if CURRENT_PAGE == starting_page:
-                return
-            page.controls.remove(CURRENT_PAGE)
-            navigation.hide_query_field()
-            page.add(starting_page)
-            starting_page.input_box.value = query
-            CURRENT_PAGE = starting_page
+        def open_pokedex():
+            if navigation.expanded_view:
+                navigation.start_processing_query_animation(loading_text = "Generating response...")
+                time.sleep(3)
+                navigation.stop_processing_query_animation()
+                navigation.hide_body()
+                navigation.show_hide_expand_query()
+                bottom_nav.open()
 
-        def animate_page_change(on_half: callable, on_end: callable):
-            navigation.on_animation_end = on_end
-            navigation.animate_open_close(on_half_animation= on_half, target_position= 0.6)
-            bottom_nav.animate_open_close(target_position= 0.1)
+        def close_pokedex():
+                navigation.show_body()
+                navigation.show_hide_expand_query()
+                bottom_nav.close()
 
-        async def route_change(e: ft.ControlEvent):
-            await asyncio.sleep(0.5)
-            animate_page_change(on_half= lambda _: page.add(CURRENT_PAGE), on_end= lambda _: print("fired"))
+
+        def route_change(e: ft.ControlEvent):
 
             if page.route == "/main_page":
-                query = navigation.query_field.value if navigation.query_field.visible else None
-                #main_page_go(query)
+                if CURRENT_PAGE == starting_page:
+                    return
+                change_page(starting_page)
+                close_pokedex()
 
             if page.route.startswith("/query="):
-                query = starting_page.input_box.value
-                #query_page_go(query)
-
+                change_page(query_page)
+                open_pokedex()
 
         page.on_route_change = route_change
         

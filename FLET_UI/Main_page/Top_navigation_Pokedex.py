@@ -71,7 +71,7 @@ class TopNavigationPokedex(Container):
         
         self.title = Text_decorator(title)
 
-        self.query_field_prefix = IconButton(Icons.EXPAND, on_click= on_expand_query, visible=False)
+        self.query_field_prefix = IconButton(Icons.EXPAND, on_click= on_expand_query, visible=False, icon_color= "green")
 
         self.query_field = Pokedex_screen(
             on_submit= self.on_submit_query,
@@ -218,8 +218,7 @@ class TopNavigationPokedex(Container):
             height = self.page.height * self.height_page_ratio
             height = max(height, self.min_height)
         else:
-            # Minimized height when body is hidden
-            height = TopNavigationPokedex.MIN_HEIGHT_HIDE_BODY + self.overlap  # header height + overlap
+            height = TopNavigationPokedex.MIN_HEIGHT_HIDE_BODY + self.overlap
 
         self.width = self.page.width
         self.height = height - self.overlap
@@ -335,6 +334,9 @@ class TopNavigationPokedex(Container):
         def hide_upper_view(e):
             self.expanded_body.visible = False
             self.expanded_body.update()
+            self._animate_scrolling(0)
+            self._update_children()
+
         self.expanded_view = False
         self.min_height = TopNavigationPokedex.MIN_HEIGHT_HIDE_BODY
         target_position = -(self.height) + self.min_height
@@ -346,7 +348,6 @@ class TopNavigationPokedex(Container):
             return
 
         def reveal():
-            self.structure.animate_offset = None
             self.expanded_body.visible = True
             self.expanded_body.update()
             self.expanded_view = True

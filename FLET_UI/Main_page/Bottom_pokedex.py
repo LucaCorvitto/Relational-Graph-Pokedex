@@ -69,19 +69,57 @@ class BottomPokedex(Stack):
         animate_position = Animation(500, AnimationCurve.LINEAR),
         )
 
-    def _update_children(self, e = None):
+        self._is_open = False  # ← Track open state
+
+    def _update_children(self, e=None):
         height = self.page.height * self.height_page_ratio
-
-        height = height if height > self.min_height else self.min_height
-
+        height = max(height, self.min_height)
         width = self.page.width
 
-        self.outline.draw_zigzag(width= width, height= height)
+        self.outline.draw_zigzag(width=width, height=height)
         self.outline.update()
         self.invisi_container.width = width
         self.invisi_container.height = height
         self.invisi_container.update()
+
+        # ⬇ Reapply open/close position based on state after resizing
+        if self._is_open:
+            self.bottom = -(height / 2) + BottomPokedex.INTRINSIC_OFFSET
+        else:
+            self.bottom = BottomPokedex.INTRINSIC_OFFSET
+
         self.update()
+
+    def open(self):
+        """
+        Slide the element upward by half its height (off-screen).
+        """
+        self.animate_position = Animation(400, AnimationCurve.EASE_OUT)
+        height = self.page.height * self.height_page_ratio
+        height = max(height, self.min_height)
+
+        self.bottom = -(height / 2) + BottomPokedex.INTRINSIC_OFFSET
+        self._is_open = True
+        self.update()
+
+    def close(self):
+        """
+        Return to the default resting position.
+        """
+        self.animate_position = Animation(400, AnimationCurve.EASE_OUT)
+        self.bottom = BottomPokedex.INTRINSIC_OFFSET
+        self._is_open = False
+        self.update()
+
+    def toggle_open_close(self):
+        """
+        Toggles between open and close states.
+        """
+        if self._is_open:
+            self.close()
+        else:
+            self.open()
+
 
 
     def did_mount(self):
@@ -142,7 +180,7 @@ if __name__ == "__main__":
     from flet import Page, IconButton, Icons, app
     def main(page: Page):
         poke = BottomPokedex()
-        page.add(IconButton(Icons.ABC, on_click= lambda _: poke.animate_open_close()))
+        page.add(IconButton(Icons.ABC, on_click= lambda _: poke.toggle_open_close()))
         page.overlay.append(poke)
         page.update()
 
