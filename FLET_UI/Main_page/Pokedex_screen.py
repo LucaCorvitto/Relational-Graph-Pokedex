@@ -55,6 +55,7 @@ class Pokedex_screen(ft.Container):
             value= value,
             hint_text= hint_text,
             multiline= True,
+            shift_enter= True
         )
 
         super().__init__(

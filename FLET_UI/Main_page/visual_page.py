@@ -10,7 +10,7 @@ sys.path.insert(0, parent_dir)
 from FLET_UI.Main_page.Top_navigation_Pokedex import TopNavigationPokedex
 
 class Main_structure(ft.Container):
-    def __init__(self):
+    def __init__(self, query):
         super().__init__(expand=True)
 
         self.content = ft.Column([
@@ -26,7 +26,7 @@ class Main_structure(ft.Container):
                     expand_loose= True
                 ),
                 ft.Divider(),
-                ft.Container(bgcolor= "blue", expand= True)
+                ft.Container(bgcolor= "blue", expand= True, content= ft.Text("\n\n" + query))
                 ],
                 expand=True,
                 vertical_alignment= ft.CrossAxisAlignment.START,

@@ -77,7 +77,7 @@ class TopNavigationPokedex(Container):
             on_submit= self.on_submit_query,
             prefix= self.query_field_prefix,
             height= 50,
-            on_change= self.sync_queries,
+            on_change= self._sync_queries,
         )
         
         self.invisi_divider = VerticalDivider(width= 70, opacity= 0)
@@ -132,7 +132,7 @@ class TopNavigationPokedex(Container):
             hint_text= "Insert here your query",
             bgcolor= lighten_color(self.color),
             on_submit= self.on_submit_query,
-            on_change= self.sync_queries,
+            on_change= self._sync_queries,
         )
 
         self.description_box = Container(
@@ -154,13 +154,19 @@ class TopNavigationPokedex(Container):
             visible= self.expanded_view
         )
 
-    def sync_queries(self, e):
+    def _sync_queries(self, e):
         if e.control == self.query_field.text_screen:
             self.input_box.value = self.query_field.text_screen.value
             self.input_box.update()
         else:
             self.query_field.text_screen.value = self.input_box.value
             self.query_field.text_screen.update()
+
+    def set_query(self, query):
+        self.input_box.value = query
+        self.query_field.text_screen.value = query
+        self.input_box.update()
+        self.query_field.text_screen.update()
 
     def show_hide_expand_query(self):
         self.query_field_prefix.visible = not self.query_field_prefix.visible
@@ -354,7 +360,7 @@ class TopNavigationPokedex(Container):
             self.min_height = TopNavigationPokedex.MIN_HEIGHT_SHOW_BODY
             self._update_children()
             self.structure.on_animation_end = lambda _: self._animate_scrolling(0)
-            self._animate_scrolling(self.min_height)
+            self._animate_scrolling(self.min_height/5)
 
         reveal()
 

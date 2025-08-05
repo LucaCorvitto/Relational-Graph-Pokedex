@@ -40,7 +40,6 @@ class PokeballInput(Container):
             max_lines=4,
             expand=True,
             on_submit=on_submit,
-            shift_enter=True,
             on_change=change,
         )
 

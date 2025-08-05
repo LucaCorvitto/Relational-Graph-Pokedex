@@ -1,4 +1,3 @@
-import asyncio
 import time
 import flet as ft
 
@@ -15,8 +14,13 @@ from FLET_UI.Main_page.Bottom_pokedex import BottomPokedex
 from FLET_UI.Main_page.visual_page import Main_structure
 
 CURRENT_PAGE : ft.Container = None
+QUERY_DELIMITER = '#'
 
 if __name__ == "__main__":
+
+    def crate_query_page(page: ft.Page, query: str):
+        return Main_structure(query)
+
     def main(page: ft.Page):
         global CURRENT_PAGE
         page.title = "POKEDEX"
@@ -27,6 +31,8 @@ if __name__ == "__main__":
             insert query in e.control.data
             """
             query :str = navigation.query_field.text_screen.value
+            if query is not None:
+                query = query.replace('\n', QUERY_DELIMITER)
             page.go(f"/query={query}")
 
         def change_route(e: ft.ControlEvent):
@@ -39,7 +45,6 @@ if __name__ == "__main__":
             height_page_ratio= 4/5
             )
         starting_page = ft.Container(bgcolor= "green")
-        query_page = Main_structure()
         bottom_nav = BottomPokedex(color= ft.Colors.GREY_100, height_page_ratio= 1/5)
 
         CURRENT_PAGE = starting_page
@@ -74,8 +79,10 @@ if __name__ == "__main__":
                 navigation.show_hide_expand_query()
                 bottom_nav.close()
 
-
         def route_change(e: ft.ControlEvent):
+
+            def extract_query(input_str: str, prefix="/query=", delimiter="#", replacement="\n") -> str:
+                return input_str[len(prefix):].replace(delimiter, replacement)
 
             if page.route == "/main_page":
                 if CURRENT_PAGE == starting_page:
@@ -84,10 +91,14 @@ if __name__ == "__main__":
                 close_pokedex()
 
             if page.route.startswith("/query="):
-                change_page(query_page)
+                query = extract_query(page.route, delimiter= QUERY_DELIMITER)
+                change_page(crate_query_page(page, query))
                 open_pokedex()
+
+            else:
+                page.go("/main_page")
 
         page.on_route_change = route_change
         
 
-    ft.app(target=main)
+    ft.app(target=main, view= ft.AppView.WEB_BROWSER)
