@@ -48,6 +48,7 @@ class TopNavigationPokedex(Container):
         self.width_page_ratio = width_page_ratio
 
         self._vibrating = None
+        self._processing = False
 
         self.overlap = overlap
 
@@ -90,27 +91,13 @@ class TopNavigationPokedex(Container):
             vertical_alignment= CrossAxisAlignment.END,
         )
         
-        self.input_box = Divider(visible=False) #this is only a placeholder
-        self.description_box = Divider(visible=False)
-
-        if self.expanded_view:
-            self.create_expanded_body()
-
-        self.upper_view = Container(
-            Column(
-                [self.title, self.input_box, self.description_box],
-                horizontal_alignment= CrossAxisAlignment.CENTER
-                ),
-            expand = True,
-            padding= 20,
-            visible= self.expanded_view
-        )
+        self.create_expanded_body()
 
         spacer = Divider(height= self.overlap/2, opacity=0)
 
         content_column = Column(
             controls=[
-                self.upper_view,
+                self.expanded_body,
                 self.header,
                 spacer
             ],
@@ -157,6 +144,16 @@ class TopNavigationPokedex(Container):
             expand_loose= True,
         )
 
+        self.expanded_body = Container(
+            Column(
+                [self.title, self.input_box, self.description_box],
+                horizontal_alignment= CrossAxisAlignment.CENTER
+                ),
+            expand = True,
+            padding= 20,
+            visible= self.expanded_view
+        )
+
     def sync_queries(self, e):
         if e.control == self.query_field.text_screen:
             self.input_box.value = self.query_field.text_screen.value
@@ -193,8 +190,8 @@ class TopNavigationPokedex(Container):
             return
         
         self.rescale_light_buttons(0.8)
-        self.upper_view.padding = 10
-        self.upper_view.update()
+        self.expanded_body.padding = 10
+        self.expanded_body.update()
         self.invisi_divider.visible = False
         self.invisi_divider.update()
         self._scale_reduced = True
@@ -207,8 +204,8 @@ class TopNavigationPokedex(Container):
             return
         
         self.rescale_light_buttons(1.25)
-        self.upper_view.padding = 20
-        self.upper_view.update()
+        self.expanded_body.padding = 20
+        self.expanded_body.update()
         self.invisi_divider.visible = True
         self.invisi_divider.update()
         self._scale_reduced = False
@@ -217,7 +214,7 @@ class TopNavigationPokedex(Container):
         if not self.page:
             return
 
-        if self.upper_view.visible:
+        if self.expanded_view:
             height = self.page.height * self.height_page_ratio
             height = max(height, self.min_height)
         else:
@@ -274,6 +271,7 @@ class TopNavigationPokedex(Container):
         self.page.update()
 
     def _animate_scrolling(self, target_position: int):
+        self.structure.animate_offset = self._default_animation
         self.structure.top = target_position
         self.structure.update()
             
@@ -332,28 +330,43 @@ class TopNavigationPokedex(Container):
         self._animate_scrolling(target_position)
 
     def hide_body(self):
+        if not self.expanded_view:
+            return
         def hide_upper_view(e):
-            self.upper_view.visible = False
-            self.upper_view.update()
+            self.expanded_body.visible = False
+            self.expanded_body.update()
+        self.expanded_view = False
         self.min_height = TopNavigationPokedex.MIN_HEIGHT_HIDE_BODY
         target_position = -(self.height) + self.min_height
         self.structure.on_animation_end = hide_upper_view
         self._animate_scrolling(target_position)
         
-
     def show_body(self):
-        self.upper_view.visible = True
-        self.upper_view.update()
-        self.min_height = TopNavigationPokedex.MIN_HEIGHT_SHOW_BODY
-        target_position = self.height
-        self._animate_scrolling(target_position)
+        if self.expanded_view:
+            return
 
-    def processing_query_animation(self):
+        def reveal():
+            self.structure.animate_offset = None
+            self.expanded_body.visible = True
+            self.expanded_body.update()
+            self.expanded_view = True
+            self.min_height = TopNavigationPokedex.MIN_HEIGHT_SHOW_BODY
+            self._update_children()
+            self.structure.on_animation_end = lambda _: self._animate_scrolling(0)
+            self._animate_scrolling(self.min_height)
+
+        reveal()
+
+    def start_processing_query_animation(self, loading_text : str = "Loading..."):
         """
         Lights up buttons, shows processing.
         """
+        if self._processing:
+            return
+        self._processing = True
         if isinstance(self.input_box , PokeballInput):
             self.input_box.button.start_rotating()
+        self.query_field.start_loading(loading_text)
         self.light_0.stop_blinking()
         self.light_0.start_blinking(frequency= 0.25)
         time.sleep(0.15)
@@ -362,28 +375,32 @@ class TopNavigationPokedex(Container):
         self.light_2.start_blinking(frequency= 0.5)
         time.sleep(0.15)
         self.light_3.start_blinking(frequency= 0.5)
+
+    def stop_processing_query_animation(self):
+        if not self._processing:
+            return
+        self._processing = False
+        if isinstance(self.input_box , PokeballInput):
+            self.input_box.button.stop_rotating()
+        self.query_field.stop_loading()
+        self.light_0.stop_blinking()
+        self.light_0.start_blinking()
+        self.light_1.stop_blinking()
+        self.light_2.stop_blinking()
+        self.light_3.stop_blinking()
         
 
 if __name__ == "__main__":
     from flet import Page, TextField, app
     def main(page: Page):
 
-        hidden = False
-
-        # This triggers after did_mount has placed structure in overlay
         def move(e):
-            
-            nonlocal hidden
-            if hidden:
-                poke.on_animation_end = poke.show_body()
-                poke.animate_open_close(0.5)
-                hidden = False
+            if poke.expanded_view == False:
+                poke.show_body()
             else:
-                poke.on_animation_end = lambda _: poke.hide_body()
-                poke.animate_open_close(0.5)
-                hidden = True
+                poke.hide_body()
 
-        poke = TopNavigationPokedex(on_submit_query= move)
+        poke = TopNavigationPokedex(on_submit_query= move, expanded_view= False)
 
         page.add(TextField(
             hint_text="insert_query",

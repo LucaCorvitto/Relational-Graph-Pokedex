@@ -19,6 +19,7 @@ class BottomPokedex(Stack):
     """
     Make sure to append this on the page overlay.
     """
+    INTRINSIC_OFFSET = 13
     def  __init__(
             self,
             title: Optional[str] = "Pokedex",
@@ -63,7 +64,7 @@ class BottomPokedex(Stack):
             self.outline,
             self.invisi_container
         ],
-        bottom= 13,
+        bottom= BottomPokedex.INTRINSIC_OFFSET,
         alignment= alignment.top_right,
         animate_position = Animation(500, AnimationCurve.LINEAR),
         )
@@ -99,13 +100,13 @@ class BottomPokedex(Stack):
         self.page.on_resized = combined_handler
         self._handler_attached = True
         
-    def _animate_scrolling(self, target_position: float):
+    def _animate_scrolling(self, target_position: int):
         """
         Target position is relative to the page
         if you wish to call this animation, write another code that calls for self.on_animation_end at the end of the animation
         (it has to be a different function to avoid conflicts with animate_open_close)
         """
-        target_position = self.page.height * target_position
+        target_position = target_position + BottomPokedex.INTRINSIC_OFFSET
         self.bottom = target_position
         self.update()
 
@@ -135,7 +136,7 @@ class BottomPokedex(Stack):
         self.on_animation_end = lambda e: self.page.run_task(delayed_return, e)
 
         # Start animation
-        self._animate_scrolling(target_position)
+        self._animate_scrolling(self.page.height * target_position)
 
 if __name__ == "__main__":
     from flet import Page, IconButton, Icons, app

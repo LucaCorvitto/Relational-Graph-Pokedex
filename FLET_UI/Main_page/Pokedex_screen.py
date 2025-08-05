@@ -43,23 +43,13 @@ class Pokedex_screen(ft.Container):
         if hasattr(prefix, "color"):
             self.prefix.color = text_color
 
-        async def process(e):
-            if self._loading:
-                DEBUG_log("POKEDEX_SCREEN: The program is already loading", level="WARNING")
-                return
-            self.start_loading()
-            if self.on_submit:
-                self.on_submit(e)
-            await asyncio.sleep(1)
-            self.stop_loading()
-
         self.text_screen = ft.TextField(
             bgcolor= background_color,
             text_style= ft.TextStyle(font_family= "fira_mono", color=text_color, size= height/4),
             border_color= background_color,
-            suffix = ft.IconButton("send", icon_color= text_color, on_click= process),
+            suffix = ft.IconButton("send", icon_color= text_color, on_click= on_submit),
             prefix= self.prefix,
-            on_submit= process,
+            on_submit= on_submit,
             height= height,
             on_change= on_change,
             value= value,
@@ -82,11 +72,11 @@ class Pokedex_screen(ft.Container):
             self._loading_icon.update()
             await asyncio.sleep(0.5)
     
-    def start_loading(self):
+    def start_loading(self, loading_text : str = "LOADING..."):
         self.text_screen.disabled = True
         self.text_screen.prefix = self._loading_icon
         self._temp_value = self.text_screen.value
-        self.text_screen.value = "     LOADING..."
+        self.text_screen.value = "   " + loading_text
         self.text_screen.update()
         if not self._loading:
             self._loading = True
@@ -111,7 +101,12 @@ class Pokedex_screen(ft.Container):
 
 if __name__ == "__main__":
     def main(page: ft.Page):
-        poke = Pokedex_screen(prefix= ft.Icon("ABC"), value= "test", on_submit= lambda _: print("lol"))
+        def process(e):
+            poke.start_loading()
+            time.sleep(1)
+            poke.stop_loading()
+            
+        poke = Pokedex_screen(prefix= ft.Icon("ABC"), value= "test", on_submit= process)
 
         page.add(poke)
         

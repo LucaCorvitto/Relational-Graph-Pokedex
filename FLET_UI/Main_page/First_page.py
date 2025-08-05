@@ -1,3 +1,4 @@
+import time
 from typing import Optional
 import flet as ft
 
@@ -25,12 +26,22 @@ if __name__ == "__main__":
             poke.on_animation_end = lambda _: print("finito!")
             poke.animate_open_close(-0.5, on_half_animation= lambda _: print("siamo a meta'!"))
         
-        def lighting(e):
-            poke.processing_query_animation()
+        def process(e):
+            if poke.expanded_view:
+                poke.start_processing_query_animation(loading_text = "Generating response...")
+                time.sleep(3)
+                poke.stop_processing_query_animation()
+                poke.hide_body()
+                bottom._animate_scrolling(-20)
 
-        poke = TopNavigationPokedex(on_submit_query= lighting, height_page_ratio= 4/5)
+            else:
+                poke.show_body()
+                bottom._animate_scrolling(0)
 
-        page.overlay.append(BottomPokedex(height_page_ratio=1/5, color="white"))
+
+        poke = TopNavigationPokedex(on_submit_query= process, height_page_ratio= 4/5)
+        bottom = BottomPokedex(height_page_ratio=1/5, color="white")
+        page.overlay.append(bottom)
 
         page.add(poke)
         
