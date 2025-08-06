@@ -61,7 +61,7 @@ def initialization(debug=False, api=False, gen_model="gemma3:1b", code_model="ge
         llm = ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key=OPENAI_API_KEY)
         code_llm = llm
     else:
-        embed_model = OllamaEmbeddings(model="dengcao/Qwen3-Embedding-0.6B:F16", base_url="http://127.0.0.1:11435")
+        embed_model = OllamaEmbeddings(model="nomic-embed-text", base_url="http://127.0.0.1:11435")
         llm = ChatOllama(model=gen_model, temperature=0, base_url="http://127.0.0.1:11435") #
         code_llm = ChatOllama(
             model=code_model,
