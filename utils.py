@@ -12,10 +12,19 @@ import logging
 import csv
 from my_langgraph_definition import building_pokemon_graph
 
+class CustomOllamaEmbeddings(OllamaEmbeddings):
+    def embed_documents(self, texts):
+        return self._client.embed(
+            self.model,
+            texts,
+            options={"dim": 1536}
+        )["embeddings"]
+
 DEBUG = True
 API=False
 GEN_MODEL="llama3.1:8b"
 CODE_MODEL="qwen2.5-coder:7b"
+EMBEDDER_MODEL = "dengcao/Qwen3-Embedding-4B:Q4_K_M" #nomic-embed-text # #dengcao/Qwen3-Embedding-0.6B:F16
 
 # use this to create an instance of all the pokemon names in the dataset to be used in other functions
 def extract_pokemon_names(csv_file_path):
@@ -35,7 +44,7 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
-def initialization(debug=False, api=False, gen_model="gemma3:1b", code_model="gemma3:1b"):
+def initialization(debug=False, api=False, gen_model="gemma3:1b", code_model="gemma3:1b", embedder_model="nomic-embed-text"):
     if debug:
     # SECRETS
         with open("secrets.yaml","r") as s:
@@ -61,7 +70,8 @@ def initialization(debug=False, api=False, gen_model="gemma3:1b", code_model="ge
         llm = ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key=OPENAI_API_KEY)
         code_llm = llm
     else:
-        embed_model = OllamaEmbeddings(model="nomic-embed-text", base_url="http://127.0.0.1:11435")
+        # embed_model = OllamaEmbeddings(model=embedder_model, base_url="http://127.0.0.1:11435")
+        embed_model = CustomOllamaEmbeddings(model=embedder_model, base_url="http://127.0.0.1:11435")
         llm = ChatOllama(model=gen_model, temperature=0, base_url="http://127.0.0.1:11435") #
         code_llm = ChatOllama(
             model=code_model,
@@ -94,9 +104,9 @@ def initialization(debug=False, api=False, gen_model="gemma3:1b", code_model="ge
             "pokemon_names":pokemon_names_list
             }
 
-def build_graph(debug=DEBUG, api=API, gen_model=GEN_MODEL, code_model=CODE_MODEL):
+def build_graph(debug=DEBUG, api=API, gen_model=GEN_MODEL, code_model=CODE_MODEL, embedder_model=EMBEDDER_MODEL):
     # --- Init ---
-    init = initialization(debug, api, gen_model, code_model)
+    init = initialization(debug, api, gen_model, code_model, embedder_model)
     llm = init["llm"]
     code_llm = init["code_llm"]
     vectorstore = init["vectorstore"]
