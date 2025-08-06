@@ -19,8 +19,8 @@ CURRENT_PAGE : ft.Container = None
 
 if __name__ == "__main__":
 
-    def crate_query_page(page: ft.Page, query: str):
-        return Main_structure(query)
+    def crate_query_page(page: ft.Page, answer: str):
+        return Main_structure(answer)
 
     def main(page: ft.Page):
         global CURRENT_PAGE
@@ -64,16 +64,16 @@ if __name__ == "__main__":
             CURRENT_PAGE = target_page
             page.add(target_page)
 
-        def open_pokedex(query):
+        def open_pokedex(query) -> str:
             if navigation.expanded_view:
                 navigation.start_processing_query_animation(loading_text = "Generating response...")
-                time.sleep(1)
                 #insert query to LLM
-                run_pokemon_query(query, pokemon_graph_agent, pokemon_names, driver)
+                answer = run_pokemon_query(query, pokemon_graph_agent, pokemon_names, driver)
                 navigation.stop_processing_query_animation()
                 navigation.hide_body()
                 navigation.show_hide_expand_query()
                 bottom_nav.open()
+                return answer["response"]
 
         def close_pokedex():
                 navigation.show_body()
@@ -94,8 +94,8 @@ if __name__ == "__main__":
             if page.route.startswith("/query="):
                 query = extract_query(page.route)
                 navigation.set_query(query)
-                open_pokedex(query)
-                change_page(crate_query_page(page, query))
+                answer = open_pokedex(query)
+                change_page(crate_query_page(page, answer))
 
             else:
                 page.go("/main_page")
