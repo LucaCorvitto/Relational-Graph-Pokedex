@@ -12,10 +12,9 @@ sys.path.insert(0, parent_dir)
 from FLET_UI.Main_page.Top_navigation_Pokedex import TopNavigationPokedex
 from FLET_UI.Main_page.Bottom_pokedex import BottomPokedex
 from FLET_UI.Main_page.visual_page import Main_structure
-# import my_langgraph_definition as LLM
 from utils import build_graph, run_pokemon_query
 
-WEB_VIEW = True
+WEB_VIEW = False
 CURRENT_PAGE : ft.Container = None
 
 if __name__ == "__main__":
@@ -33,7 +32,6 @@ if __name__ == "__main__":
             query: str = navigation.query_field.text_screen.value
             if query:
                 encoded_query = urllib.parse.quote(query)
-                print(query, encoded_query)
                 page.go(f"/query={encoded_query}")  
 
         def change_route(e: ft.ControlEvent):
