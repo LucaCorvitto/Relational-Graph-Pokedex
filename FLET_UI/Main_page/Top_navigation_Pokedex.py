@@ -337,7 +337,10 @@ class TopNavigationPokedex(Container):
     def hide_body(self):
         if not self.expanded_view:
             return
+        
         def hide_upper_view(e):
+            if self.on_animation_end:
+                self.structure.on_animation_end = self.on_animation_end
             self.expanded_body.visible = False
             self.expanded_body.update()
             self._animate_scrolling(0)
@@ -352,13 +355,18 @@ class TopNavigationPokedex(Container):
     def show_body(self):
         if self.expanded_view:
             return
+        
+        def on_end(_):
+            if self.on_animation_end:
+                self.structure.on_animation_end = self.on_animation_end
+            self._animate_scrolling(0)
 
         self.expanded_body.visible = True
         self.expanded_body.update()
         self.expanded_view = True
         self.min_height = TopNavigationPokedex.MIN_HEIGHT_SHOW_BODY
         self._update_children()
-        self.structure.on_animation_end = lambda _: self._animate_scrolling(0)
+        self.structure.on_animation_end = on_end
         self._animate_scrolling(self.min_height/5)
 
 
