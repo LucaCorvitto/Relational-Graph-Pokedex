@@ -127,6 +127,7 @@ if __name__ == "__main__":
 
                 # Step 4: Show result and open pokedex
                 change_page(result_page)
+                open_pokedex()
 
             async def show_error_page(error: str):
                 change_page(create_error_page(error=error))
