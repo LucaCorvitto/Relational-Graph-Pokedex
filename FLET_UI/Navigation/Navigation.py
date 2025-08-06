@@ -22,26 +22,13 @@ if __name__ == "__main__":
     def crate_query_page(page: ft.Page, query: str, answer: str):
         return Main_structure(query=query, response=answer)
 
-    def create_loading(page: ft.Page):
-        page.vertical_alignment= ft.MainAxisAlignment.CENTER
-        page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
-        page.add(ft.Text("Initialising LLM"))
-        page.add(ft.ProgressRing())
-
-    def de_create_loading(page: ft.Page):
-        page.vertical_alignment= ft.MainAxisAlignment.START
-        page.horizontal_alignment = ft.CrossAxisAlignment.START
-        page.controls.clear()
-
     def main(page: ft.Page):
         global CURRENT_PAGE
         page.title = "POKEDEX"
         page.route = "/main_page"
+        page.window.width = 500
+        page.window.height = 700
 
-        create_loading(page)
-        pokemon_graph_agent, pokemon_names, driver = build_graph()
-        de_create_loading(page)
-        
         def submit_query(e: ft.ControlEvent):
             query: str = navigation.query_field.text_screen.value
             if query:
@@ -63,12 +50,14 @@ if __name__ == "__main__":
         CURRENT_PAGE = starting_page
         page.spacing = 0
 
-        page.window.width = 351
-        page.window.height = 500
         page.overlay.append(bottom_nav)
         page.add(navigation)
         page.add(CURRENT_PAGE)
         page.update()
+
+        navigation.start_processing_query_animation(loading_text = "Initialising...")
+        pokemon_graph_agent, pokemon_names, driver = build_graph()
+        navigation.stop_processing_query_animation()
 
         def change_page(target_page):
             global CURRENT_PAGE
