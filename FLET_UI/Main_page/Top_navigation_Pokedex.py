@@ -48,7 +48,7 @@ class TopNavigationPokedex(Container):
         self.width_page_ratio = width_page_ratio
 
         self._vibrating = None
-        self._processing = False
+        self.processing = False
 
         self.overlap = overlap
 
@@ -168,7 +168,7 @@ class TopNavigationPokedex(Container):
         self.input_box.update()
         self.query_field.text_screen.update()
 
-    def show_hide_expand_query(self):
+    def toggle_expand_query(self):
         self.query_field_prefix.visible = not self.query_field_prefix.visible
 
     def show_query_field(self, query: Optional[str] = None):
@@ -353,24 +353,22 @@ class TopNavigationPokedex(Container):
         if self.expanded_view:
             return
 
-        def reveal():
-            self.expanded_body.visible = True
-            self.expanded_body.update()
-            self.expanded_view = True
-            self.min_height = TopNavigationPokedex.MIN_HEIGHT_SHOW_BODY
-            self._update_children()
-            self.structure.on_animation_end = lambda _: self._animate_scrolling(0)
-            self._animate_scrolling(self.min_height/5)
+        self.expanded_body.visible = True
+        self.expanded_body.update()
+        self.expanded_view = True
+        self.min_height = TopNavigationPokedex.MIN_HEIGHT_SHOW_BODY
+        self._update_children()
+        self.structure.on_animation_end = lambda _: self._animate_scrolling(0)
+        self._animate_scrolling(self.min_height/5)
 
-        reveal()
 
     def start_processing_query_animation(self, loading_text : str = "Loading..."):
         """
         Lights up buttons, shows processing.
         """
-        if self._processing:
+        if self.processing:
             return
-        self._processing = True
+        self.processing = True
         if isinstance(self.input_box , PokeballInput):
             self.input_box.button.start_rotating()
         self.query_field.start_loading(loading_text)
@@ -384,9 +382,9 @@ class TopNavigationPokedex(Container):
         self.light_3.start_blinking(frequency= 0.5)
 
     def stop_processing_query_animation(self):
-        if not self._processing:
+        if not self.processing:
             return
-        self._processing = False
+        self.processing = False
         if isinstance(self.input_box , PokeballInput):
             self.input_box.button.stop_rotating()
         self.query_field.stop_loading()
