@@ -24,6 +24,10 @@ Still limited to the first generation and on the current relationships:
 * `EVOLVES_TO`
 * `EVOLVES_FROM`
 
+# COME AVVIARE
+apri il terminale
+scrivi: $env:OLLAMA_HOST="127.0.0.1:11435"
+poi: ollama serve
 
 ## TODO
 ### Models
