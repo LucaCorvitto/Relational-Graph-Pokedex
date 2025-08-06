@@ -4,7 +4,34 @@ from pydantic import BaseModel, Field
 from langchain.schema import Document
 from neo4j.exceptions import SessionExpired, ServiceUnavailable, TransientError
 import time
-from utils import logging, extract_cypher_query
+from utils import logging
+import re
+
+def extract_cypher_query(text: str) -> str:
+    """
+    Extracts and returns a cleaned Cypher query string from:
+    - Markdown-style code block ```cypher ... ```
+    - Free text that contains a Cypher query with known keywords
+
+    Returns an empty string if no query is found.
+    """
+
+    # First, try to extract from markdown code block
+    markdown_match = re.search(r"```cypher\s+(.*?)\s*```", text, re.DOTALL | re.IGNORECASE)
+    if markdown_match:
+        code_block = markdown_match.group(1)
+        return " ".join(line.strip() for line in code_block.strip().splitlines())
+
+    # Otherwise, look for free-form Cypher queries in the text
+    cypher_keywords = r"(MATCH|CREATE|MERGE|RETURN|DELETE|DETACH|SET|WITH|UNWIND|OPTIONAL\s+MATCH)"
+    pattern = re.compile(rf"\b(?:{cypher_keywords})\b.*?(?:;|\n|$)", re.IGNORECASE | re.DOTALL)
+    match = pattern.search(text)
+
+    if match:
+        query = match.group(0)
+        return " ".join(line.strip() for line in query.strip().splitlines())
+
+    return ""
 
 def building_pokemon_graph(llm, code_llm, vectorstore, driver, NEO4J_URI, NEO4J_AUTH):
 

@@ -11,7 +11,8 @@ sys.path.insert(0, parent_dir)
 from FLET_UI.Main_page.Top_navigation_Pokedex import TopNavigationPokedex
 from FLET_UI.Main_page.Bottom_pokedex import BottomPokedex
 from FLET_UI.Main_page.visual_page import Main_structure
-import my_langgraph_definition as LLM
+# import my_langgraph_definition as LLM
+from utils import build_graph, run_pokemon_query
 
 WEB_VIEW = True
 CURRENT_PAGE : ft.Container = None
@@ -26,6 +27,7 @@ if __name__ == "__main__":
         global CURRENT_PAGE
         page.title = "POKEDEX"
         page.route = "/main_page"
+        pokemon_graph_agent, pokemon_names, driver = build_graph()
 
         def submit_query(e: ft.ControlEvent):
             """
@@ -66,11 +68,12 @@ if __name__ == "__main__":
             CURRENT_PAGE = target_page
             page.add(target_page)
 
-        def open_pokedex():
+        def open_pokedex(query):
             if navigation.expanded_view:
                 navigation.start_processing_query_animation(loading_text = "Generating response...")
-                time.sleep(3)
+                time.sleep(1)
                 #insert query to LLM
+                run_pokemon_query(query, pokemon_graph_agent, pokemon_names, driver)
                 navigation.stop_processing_query_animation()
                 navigation.hide_body()
                 navigation.show_hide_expand_query()
@@ -95,7 +98,7 @@ if __name__ == "__main__":
             if page.route.startswith("/query="):
                 query = extract_query(page.route, delimiter= QUERY_DELIMITER)
                 navigation.set_query(query)
-                open_pokedex()
+                open_pokedex(query)
                 change_page(crate_query_page(page, query))
 
             else:

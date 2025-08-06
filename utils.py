@@ -10,6 +10,12 @@ from neo4j import GraphDatabase
 from neo4j.exceptions import SessionExpired, ServiceUnavailable, TransientError
 import logging
 import csv
+from my_langgraph_definition import building_pokemon_graph
+
+DEBUG = True
+API=False
+GEN_MODEL="llama3.1:8b"
+CODE_MODEL="qwen2.5-coder:7b"
 
 # use this to create an instance of all the pokemon names in the dataset to be used in other functions
 def extract_pokemon_names(csv_file_path):
@@ -55,7 +61,7 @@ def initialization(debug=False, api=False, gen_model="gemma3:1b", code_model="ge
         llm = ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key=OPENAI_API_KEY)
         code_llm = llm
     else:
-        embed_model = OllamaEmbeddings(model="nomic-embed-text", base_url="http://127.0.0.1:11435")
+        embed_model = OllamaEmbeddings(model="dengcao/Qwen3-Embedding-0.6B:F16", base_url="http://127.0.0.1:11435")
         llm = ChatOllama(model=gen_model, temperature=0, base_url="http://127.0.0.1:11435") #
         code_llm = ChatOllama(
             model=code_model,
@@ -69,7 +75,7 @@ def initialization(debug=False, api=False, gen_model="gemma3:1b", code_model="ge
         while not pc.describe_index(INDEX_NAME).status["ready"]:
             time.sleep(1)
     index = pc.Index(INDEX_NAME)
-    
+
     vectorstore = PineconeVectorStore(index=index, embedding=embed_model)
     driver = GraphDatabase.driver(NEO4J_URI, auth=NEO4J_AUTH)
 
@@ -88,31 +94,46 @@ def initialization(debug=False, api=False, gen_model="gemma3:1b", code_model="ge
             "pokemon_names":pokemon_names_list
             }
 
-def extract_cypher_query(text: str) -> str:
-    """
-    Extracts and returns a cleaned Cypher query string from:
-    - Markdown-style code block ```cypher ... ```
-    - Free text that contains a Cypher query with known keywords
-    
-    Returns an empty string if no query is found.
-    """
+def build_graph(debug=DEBUG, api=API, gen_model=GEN_MODEL, code_model=CODE_MODEL):
+    # --- Init ---
+    init = initialization(debug, api, gen_model, code_model)
+    llm = init["llm"]
+    code_llm = init["code_llm"]
+    vectorstore = init["vectorstore"]
+    driver = init["driver"]
+    NEO4J_URI = init["secrets"]["NEO4J_URI"]
+    NEO4J_AUTH = init["secrets"]["NEO4J_AUTH"]
+    pokemon_names = init["pokemon_names"]
 
-    # First, try to extract from markdown code block
-    markdown_match = re.search(r"```cypher\s+(.*?)\s*```", text, re.DOTALL | re.IGNORECASE)
-    if markdown_match:
-        code_block = markdown_match.group(1)
-        return " ".join(line.strip() for line in code_block.strip().splitlines())
+    pokemon_graph_agent = building_pokemon_graph(llm, code_llm, vectorstore, driver, NEO4J_URI, NEO4J_AUTH)
 
-    # Otherwise, look for free-form Cypher queries in the text
-    cypher_keywords = r"(MATCH|CREATE|MERGE|RETURN|DELETE|DETACH|SET|WITH|UNWIND|OPTIONAL\s+MATCH)"
-    pattern = re.compile(rf"\b(?:{cypher_keywords})\b.*?(?:;|\n|$)", re.IGNORECASE | re.DOTALL)
-    match = pattern.search(text)
+    return pokemon_graph_agent, pokemon_names, driver
 
-    if match:
-        query = match.group(0)
-        return " ".join(line.strip() for line in query.strip().splitlines())
+# def extract_cypher_query(text: str) -> str:
+#     """
+#     Extracts and returns a cleaned Cypher query string from:
+#     - Markdown-style code block ```cypher ... ```
+#     - Free text that contains a Cypher query with known keywords
 
-    return ""  # No valid Cypher query found
+#     Returns an empty string if no query is found.
+#     """
+
+#     # First, try to extract from markdown code block
+#     markdown_match = re.search(r"```cypher\s+(.*?)\s*```", text, re.DOTALL | re.IGNORECASE)
+#     if markdown_match:
+#         code_block = markdown_match.group(1)
+#         return " ".join(line.strip() for line in code_block.strip().splitlines())
+
+#     # Otherwise, look for free-form Cypher queries in the text
+#     cypher_keywords = r"(MATCH|CREATE|MERGE|RETURN|DELETE|DETACH|SET|WITH|UNWIND|OPTIONAL\s+MATCH)"
+#     pattern = re.compile(rf"\b(?:{cypher_keywords})\b.*?(?:;|\n|$)", re.IGNORECASE | re.DOTALL)
+#     match = pattern.search(text)
+
+#     if match:
+#         query = match.group(0)
+#         return " ".join(line.strip() for line in query.strip().splitlines())
+
+#     return ""  # No valid Cypher query found
 
 
 
@@ -213,7 +234,56 @@ def get_graph_by_type(driver, graph_info, pokemon_names):
     # what to do if graph_info does not contain any pokemon name?
     if list_of_nodes:
         return get_pokemon_relational_graph(driver, list_of_nodes)
-        # Nessun nodo grafico riconosciuto → ritorno vuoto
+    # Nessun nodo grafico riconosciuto → ritorno vuoto
     else:
         return [], []
 
+def run_pokemon_query(query, pokemon_graph_agent, pokemon_names, driver):
+    #pokemon_graph_agent, pokemon_names, driver = build_graph()
+    logging.info(f"Received query: {query}")
+
+    initial_input = {"query": query}
+    thread = {"configurable": {"thread_id": "42"}}
+
+    try:
+        final_state = pokemon_graph_agent.invoke(initial_input, config=thread)
+        response_text = final_state.get("response", "")
+        graph_info = final_state.get("graph_info", [])
+
+        logging.info(f"Response: {response_text}")
+        if graph_info:
+            logging.info(f"Graph info: {graph_info}")
+
+        # Salva la graph_info per il GET
+        #app.state.last_graph_info = graph_info
+
+        nodes, edges = get_graph_by_type(driver, graph_info, pokemon_names)
+        print("nodes:", nodes)
+        print("edges:", edges)
+
+        return {
+            "response":response_text,
+            "graph_info":graph_info,
+            "nodes":nodes,
+            "edges":edges
+            }
+    # QueryResponse(
+    #         response=response_text,
+    #         graph_info=graph_info,
+    #         nodes=nodes,
+    #         edges=edges
+    #     )
+
+    except Exception as e:
+        logging.error(f"Error during processing query '{query}': {e}", exc_info=True)
+        return {
+            "response":"Errore interno del server",
+            "graph_info":[],
+            "nodes":[],
+            "edges":[]
+            }
+        # return QueryResponse(
+        #     response="Errore interno del server",
+        #     graph_info=[],
+        #     nodes=[],
+        #     edges=[])
