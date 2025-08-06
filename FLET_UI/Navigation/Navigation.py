@@ -20,7 +20,7 @@ CURRENT_PAGE : ft.Container = None
 
 if __name__ == "__main__":
 
-    def crate_query_page(page: ft.Page, query: str, answer: str):
+    def create_query_page(page: ft.Page, query: str, answer: str):
         return Main_structure(query=query, response=answer)
 
     def create_error_page(error: str):
@@ -98,6 +98,7 @@ if __name__ == "__main__":
                 try:
                     answer = run_pokemon_query(query, pokemon_graph_agent, pokemon_names, driver)
                 except Exception as e:
+                    navigation.stop_processing_query_animation()  # stop before redirection
                     handle_error(e)
                 #return LLM response to generate next page
                 return answer["response"]
@@ -114,12 +115,18 @@ if __name__ == "__main__":
 
         def route_change(e: ft.ControlEvent):
 
-            async def extract_and_process_query(route: str):
-                query = urllib.parse.unquote(route[len("/query="):])
+            def extract_and_process_query():
+                query = urllib.parse.unquote(page.route[len("/query="):])
                 navigation.set_query(query)
+
+                # Step 1: Close pokedex and wait for animation
+                close_pokedex()
+
                 answer = process_query(query)
-                change_page(crate_query_page(page, query=query, answer=answer))
-                await close_and_then_open_pokedex()  # Wait for animation before opening
+                result_page = create_query_page(page, query=query, answer=answer)
+
+                # Step 4: Show result and open pokedex
+                change_page(result_page)
 
             async def show_error_page(error: str):
                 change_page(create_error_page(error=error))
@@ -133,8 +140,7 @@ if __name__ == "__main__":
                 return
 
             elif route.startswith("/query="):
-                page.run_task(extract_and_process_query, route)
-                return
+                extract_and_process_query()
 
             elif route.startswith("/Error="):
                 error = urllib.parse.unquote(route[len("/Error="):])
