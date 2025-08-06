@@ -77,7 +77,7 @@ class Pokedex_screen(ft.Container):
         self.text_screen.disabled = True
         self.text_screen.prefix = self._loading_icon
         self._temp_value = self.text_screen.value
-        self.text_screen.value = "   " + loading_text
+        self.text_screen.value = " " + loading_text
         self.text_screen.update()
         if not self._loading:
             self._loading = True

@@ -1,3 +1,4 @@
+import asyncio
 import time
 import flet as ft
 import urllib.parse
@@ -14,34 +15,32 @@ from FLET_UI.Main_page.Bottom_pokedex import BottomPokedex
 from FLET_UI.Main_page.visual_page import Main_structure
 from utils import build_graph, run_pokemon_query
 
-WEB_VIEW = False
+WEB_VIEW = True
 CURRENT_PAGE : ft.Container = None
 
 if __name__ == "__main__":
 
-    def crate_query_page(page: ft.Page, query: str, answer: str):
+    def create_query_page(page: ft.Page, query: str, answer: str):
         return Main_structure(query=query, response=answer)
 
-    def create_loading(page: ft.Page):
-        page.vertical_alignment= ft.MainAxisAlignment.CENTER
-        page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
-        page.add(ft.Text("Initialising LLM"))
-        page.add(ft.ProgressRing())
-
-    def de_create_loading(page: ft.Page):
-        page.vertical_alignment= ft.MainAxisAlignment.START
-        page.horizontal_alignment = ft.CrossAxisAlignment.START
-        page.controls.clear()
+    def create_error_page(error: str):
+        return ft.Container(
+            content= ft.Text(f"ERROR: {error}", size= 25, weight= "bold"),
+            alignment= ft.alignment.center,
+            expand= True
+        )
 
     def main(page: ft.Page):
         global CURRENT_PAGE
         page.title = "POKEDEX"
         page.route = "/main_page"
+        page.window.width = 500
+        page.window.height = 700
 
-        create_loading(page)
-        pokemon_graph_agent, pokemon_names, driver = build_graph()
-        de_create_loading(page)
-        
+        def handle_error(e):
+            encoded_error = urllib.parse.quote(str (e))
+            page.go(f"/Error={encoded_error}")  
+
         def submit_query(e: ft.ControlEvent):
             query: str = navigation.query_field.text_screen.value
             if query:
@@ -63,12 +62,18 @@ if __name__ == "__main__":
         CURRENT_PAGE = starting_page
         page.spacing = 0
 
-        page.window.width = 351
-        page.window.height = 500
         page.overlay.append(bottom_nav)
         page.add(navigation)
         page.add(CURRENT_PAGE)
         page.update()
+
+        navigation.start_processing_query_animation(loading_text = "Initialising...")
+        try:
+            pokemon_graph_agent, pokemon_names, driver = build_graph()
+        except Exception as e:
+            handle_error(e)
+            print(e)
+        navigation.stop_processing_query_animation()
 
         def change_page(target_page):
             global CURRENT_PAGE
@@ -77,45 +82,77 @@ if __name__ == "__main__":
             page.controls.remove(CURRENT_PAGE)
             CURRENT_PAGE = target_page
             page.add(target_page)
+        
+        def open_pokedex() -> str:
+            if navigation.expanded_view:
+                if navigation.processing:
+                    navigation.stop_processing_query_animation()
+                navigation.hide_body()
+                navigation.toggle_expand_query()
+                bottom_nav.open()
 
-        def open_pokedex(query) -> str:
+        def process_query(query) -> str:
             if navigation.expanded_view:
                 navigation.start_processing_query_animation(loading_text = "Generating response...")
                 #insert query to LLM
-                answer = run_pokemon_query(query, pokemon_graph_agent, pokemon_names, driver)
-                #end processing animations and open the pokedex
-                navigation.stop_processing_query_animation()
-                navigation.hide_body()
-                navigation.show_hide_expand_query()
-                bottom_nav.open()
+                try:
+                    answer = run_pokemon_query(query, pokemon_graph_agent, pokemon_names, driver)
+                except Exception as e:
+                    navigation.stop_processing_query_animation()  # stop before redirection
+                    handle_error(e)
                 #return LLM response to generate next page
                 return answer["response"]
 
         def close_pokedex():
-                navigation.show_body()
-                navigation.show_hide_expand_query()
-                bottom_nav.close()
+            navigation.show_body()
+            navigation.toggle_expand_query()
+            bottom_nav.close()
+
+        async def close_and_then_open_pokedex():
+            close_pokedex()
+            await asyncio.sleep(1)  # Let the closing animation finish
+            open_pokedex()
 
         def route_change(e: ft.ControlEvent):
 
-            def extract_query(input_str: str, prefix="/query=") -> str:
-                return urllib.parse.unquote(input_str[len(prefix):])
+            def extract_and_process_query():
+                query = urllib.parse.unquote(page.route[len("/query="):])
+                navigation.set_query(query)
 
-            if page.route == "/main_page":
-                if CURRENT_PAGE == starting_page:
-                    return
-                change_page(starting_page)
+                # Step 1: Close pokedex and wait for animation
                 close_pokedex()
 
-            if page.route.startswith("/query="):
-                query = extract_query(page.route)
-                navigation.set_query(query)
-                answer = open_pokedex(query)
-                change_page(crate_query_page(page, query= query, answer= answer))
+                answer = process_query(query)
+                result_page = create_query_page(page, query=query, answer=answer)
+
+                # Step 4: Show result and open pokedex
+                change_page(result_page)
+
+            async def show_error_page(error: str):
+                change_page(create_error_page(error=error))
+                await close_and_then_open_pokedex()
+
+            route = page.route
+
+            if route == "/main_page":
+                change_page(starting_page)
+                close_pokedex()
+                return
+
+            elif route.startswith("/query="):
+                extract_and_process_query()
+
+            elif route.startswith("/Error="):
+                error = urllib.parse.unquote(route[len("/Error="):])
+                page.run_task(show_error_page, error)
+                return
 
             else:
+                # Invalid route, redirect
                 page.go("/main_page")
 
+
         page.on_route_change = route_change
+
         
     ft.app(target=main, view= ft.AppView.WEB_BROWSER if WEB_VIEW else ft.AppView.FLET_APP)
