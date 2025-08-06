@@ -41,6 +41,7 @@ class PokeballInput(Container):
             expand=True,
             on_submit=on_submit,
             on_change=change,
+            shift_enter= True
         )
 
         self.textfield_container = Container(

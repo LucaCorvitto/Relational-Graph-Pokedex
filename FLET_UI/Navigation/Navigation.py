@@ -8,11 +8,12 @@ import os
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 sys.path.insert(0, parent_dir)
 
-from FLET_UI.Main_page.starting_page import Starting_page
 from FLET_UI.Main_page.Top_navigation_Pokedex import TopNavigationPokedex
 from FLET_UI.Main_page.Bottom_pokedex import BottomPokedex
 from FLET_UI.Main_page.visual_page import Main_structure
+import my_langgraph_definition as LLM
 
+WEB_VIEW = True
 CURRENT_PAGE : ft.Container = None
 QUERY_DELIMITER = '#'
 
@@ -69,6 +70,7 @@ if __name__ == "__main__":
             if navigation.expanded_view:
                 navigation.start_processing_query_animation(loading_text = "Generating response...")
                 time.sleep(3)
+                #insert query to LLM
                 navigation.stop_processing_query_animation()
                 navigation.hide_body()
                 navigation.show_hide_expand_query()
@@ -92,13 +94,13 @@ if __name__ == "__main__":
 
             if page.route.startswith("/query="):
                 query = extract_query(page.route, delimiter= QUERY_DELIMITER)
-                change_page(crate_query_page(page, query))
+                navigation.set_query(query)
                 open_pokedex()
+                change_page(crate_query_page(page, query))
 
             else:
                 page.go("/main_page")
 
         page.on_route_change = route_change
         
-
-    ft.app(target=main, view= ft.AppView.WEB_BROWSER)
+    ft.app(target=main, view= ft.AppView.WEB_BROWSER if WEB_VIEW else ft.AppView.FLET_APP)

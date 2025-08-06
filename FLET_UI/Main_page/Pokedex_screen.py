@@ -19,7 +19,7 @@ class Pokedex_screen(ft.Container):
             text_color = "green",
             background_color = "black",
             frame_color = "grey",
-            padding = 5,
+            padding = 7,
             on_submit : Optional[callable] = None,
             prefix: Optional[ft.Control] = None,
             height : int = 70,
@@ -62,7 +62,7 @@ class Pokedex_screen(ft.Container):
             bgcolor= frame_color,
             padding= padding,
             content= self.text_screen,
-            border_radius= 20,
+            border_radius= 10,
             height= height,
             expand= True
         )
