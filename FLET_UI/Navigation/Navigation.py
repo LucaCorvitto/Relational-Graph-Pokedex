@@ -22,12 +22,26 @@ if __name__ == "__main__":
     def crate_query_page(page: ft.Page, query: str, answer: str):
         return Main_structure(query=query, response=answer)
 
+    def create_loading(page: ft.Page):
+        page.vertical_alignment= ft.MainAxisAlignment.CENTER
+        page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+        page.add(ft.Text("Initialising LLM"))
+        page.add(ft.ProgressRing())
+
+    def de_create_loading(page: ft.Page):
+        page.vertical_alignment= ft.MainAxisAlignment.START
+        page.horizontal_alignment = ft.CrossAxisAlignment.START
+        page.controls.clear()
+
     def main(page: ft.Page):
         global CURRENT_PAGE
         page.title = "POKEDEX"
         page.route = "/main_page"
-        pokemon_graph_agent, pokemon_names, driver = build_graph()
 
+        create_loading(page)
+        pokemon_graph_agent, pokemon_names, driver = build_graph()
+        de_create_loading(page)
+        
         def submit_query(e: ft.ControlEvent):
             query: str = navigation.query_field.text_screen.value
             if query:
