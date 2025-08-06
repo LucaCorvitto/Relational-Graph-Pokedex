@@ -168,7 +168,15 @@ class TopNavigationPokedex(Container):
         self.input_box.update()
         self.query_field.text_screen.update()
 
-    def toggle_expand_query(self):
+    def show_expand_icon(self):
+        self.query_field_prefix.visible = True
+        self.query_field.update()
+
+    def hide_expand_icon(self):
+        self.query_field_prefix.visible = False
+        self.query_field.update()
+
+    def toggle_expand_icon(self):
         self.query_field_prefix.visible = not self.query_field_prefix.visible
 
     def show_query_field(self, query: Optional[str] = None):

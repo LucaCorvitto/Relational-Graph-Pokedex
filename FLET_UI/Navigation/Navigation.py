@@ -15,7 +15,7 @@ from FLET_UI.Main_page.Bottom_pokedex import BottomPokedex
 from FLET_UI.Main_page.visual_page import Main_structure
 from utils import build_graph, run_pokemon_query
 
-WEB_VIEW = True
+WEB_VIEW = False
 CURRENT_PAGE : ft.Container = None
 
 if __name__ == "__main__":
@@ -88,8 +88,13 @@ if __name__ == "__main__":
                 if navigation.processing:
                     navigation.stop_processing_query_animation()
                 navigation.hide_body()
-                navigation.toggle_expand_query()
+                navigation.show_expand_icon()
                 bottom_nav.open()
+        
+        def close_pokedex():
+            navigation.show_body()
+            navigation.hide_expand_icon()
+            bottom_nav.close()
 
         def process_query(query) -> str:
             if navigation.expanded_view:
@@ -103,10 +108,6 @@ if __name__ == "__main__":
                 #return LLM response to generate next page
                 return answer["response"]
 
-        def close_pokedex():
-            navigation.show_body()
-            navigation.toggle_expand_query()
-            bottom_nav.close()
 
         async def close_and_then_open_pokedex():
             close_pokedex()
