@@ -1,5 +1,6 @@
 import time
 import flet as ft
+import urllib.parse
 
 import sys
 import os
@@ -16,7 +17,6 @@ from utils import build_graph, run_pokemon_query
 
 WEB_VIEW = True
 CURRENT_PAGE : ft.Container = None
-QUERY_DELIMITER = '#'
 
 if __name__ == "__main__":
 
@@ -30,13 +30,11 @@ if __name__ == "__main__":
         pokemon_graph_agent, pokemon_names, driver = build_graph()
 
         def submit_query(e: ft.ControlEvent):
-            """
-            insert query in e.control.data
-            """
-            query :str = navigation.query_field.text_screen.value
-            if query is not None:
-                query = query.replace('\n', QUERY_DELIMITER)
-            page.go(f"/query={query}")
+            query: str = navigation.query_field.text_screen.value
+            if query:
+                encoded_query = urllib.parse.quote(query)
+                print(query, encoded_query)
+                page.go(f"/query={encoded_query}")  
 
         def change_route(e: ft.ControlEvent):
             page.go("/main_page")
@@ -86,8 +84,8 @@ if __name__ == "__main__":
 
         def route_change(e: ft.ControlEvent):
 
-            def extract_query(input_str: str, prefix="/query=", delimiter="#", replacement="\n") -> str:
-                return input_str[len(prefix):].replace(delimiter, replacement)
+            def extract_query(input_str: str, prefix="/query=") -> str:
+                return urllib.parse.unquote(input_str[len(prefix):])
 
             if page.route == "/main_page":
                 if CURRENT_PAGE == starting_page:
@@ -96,7 +94,7 @@ if __name__ == "__main__":
                 close_pokedex()
 
             if page.route.startswith("/query="):
-                query = extract_query(page.route, delimiter= QUERY_DELIMITER)
+                query = extract_query(page.route)
                 navigation.set_query(query)
                 open_pokedex(query)
                 change_page(crate_query_page(page, query))
