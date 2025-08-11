@@ -131,7 +131,10 @@ def building_pokemon_graph(llm, code_llm, vectorstore, driver, NEO4J_URI, NEO4J_
     A: MATCH (p:Pokemon)-[:HAS_TYPE]->(t:Type) WITH p, collect(t) AS types, count(t) AS typeCount WHERE typeCount = 2 RETURN p.name, [type IN types | type.name] AS typeNames
 
     Q: What other pokemon share the same types as Bulbasaur?
-    A: MATCH (p1:Pokemon {name: 'Bulbasaur'})-[:SAME_TYPE]-(p2:Pokemon) RETURN DISTINCT p2.name AS same_type_pokemon
+    A: MATCH (p1:Pokemon {name: 'Bulbasaur'}), (p2:Pokemon) WHERE p2 <> p1 AND all(type IN p1.types WHERE type IN p2.types) RETURN p2.name
+
+    Q: What pokemon share at least one type with Bulbasaur?
+    A: MATCH (p1:Pokemon {name: 'Bulbasaur'})-[:SAME_TYPE]-(p2:Pokemon) RETURN p2.name
 
     Only return the Cypher query. Do not explain anything.
     """

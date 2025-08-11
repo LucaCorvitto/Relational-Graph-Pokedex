@@ -35,8 +35,8 @@ Model to download and test:
 needed to make it work for now:
 * ollama pull llama3.1:8b (general)
 * ollama pull qwen2.5-coder:7b (coding-cypher)
-* ollama pull nomic-embed-text (embedding-simple rag)
-
+* ollama pull dengcao/Qwen3-Embedding-0.6B:F16 (embedding-simple rag)
+other potential models
 * general tasks
   * ollama pull deepseek-r1:8b
   * ollama pull gemma3n:e4b
@@ -74,7 +74,7 @@ This can make easier to search for specific type sharing:
 
 ```
 MATCH (p1:Pokemon)-[r:SHARE_TYPE]->(p2:Pokemon)
-WHERE r.types = ["Electric"]
+WHERE r.type = ["Electric"]
 RETURN p1.name, p2.name
 ```
 * Update the DataBase enhancing the information extraction from the websites including also:
