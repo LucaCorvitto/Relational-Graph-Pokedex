@@ -12,7 +12,7 @@ sys.path.insert(0, parent_dir)
 
 from FLET_UI.Main_page.Top_navigation_Pokedex import TopNavigationPokedex
 from FLET_UI.Main_page.Bottom_pokedex import BottomPokedex
-from FLET_UI.Main_page.visual_page import Main_structure
+from FLET_UI.Result_page.visual_page import Main_structure
 from utils import build_graph, run_pokemon_query
 
 WEB_VIEW = False
@@ -36,6 +36,7 @@ if __name__ == "__main__":
         page.route = "/main_page"
         page.window.width = 500
         page.window.height = 700
+        page.bgcolor = ft.Colors.RED_500
 
         def handle_error(e):
             encoded_error = urllib.parse.quote(str (e))
