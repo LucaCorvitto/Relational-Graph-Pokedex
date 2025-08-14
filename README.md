@@ -57,6 +57,7 @@ Follow the order of implementation, first enlarge the KG and then edit the langg
 Add cards of different types related to the performed search (pokemon card, type card etc), cards explodes on mouse hover or click.
 
 #### Knowledge Graph
+##### DONE
 * Update the Knowledge Graph adding new relationships and using more specific ones, like:
   * `BELONGS_TO_GEN`
   * `WEAK_TO`
@@ -77,6 +78,7 @@ MATCH (p1:Pokemon)-[r:SHARE_TYPE]->(p2:Pokemon)
 WHERE r.type = ["Electric"]
 RETURN p1.name, p2.name
 ```
+##### not done
 * Update the DataBase enhancing the information extraction from the websites including also:
   * Pokedex entry relative to their generation (or every gen)
   * General information (height, weight, etc)
@@ -96,7 +98,8 @@ Let the model do a cypher query outputting a list of names/types and then visual
   * if value is ?
 
 ### UI
-* Update the UI and UX, from just a pokedex to a richer interface, IDEAS:
+* Update the UI and UX, from just a pokedex to a richer interface, older IDEAS:
   * Keep the pokedex on the side (right or left) and let visualize the images of the output pokemon instead of the graph in it, on the other side let's visualize different graphs highlighting different relationships between the search pokemon. We can make a single pokedex but that can be opened up, it's close in the mobile version and open in the desktop one
-  * Reject the standard pokedex idea and make a UI that is wider and chat-simile but still resembles a pokedex, add then graph visualizer on the side if requests. 
+  * Reject the standard pokedex idea and make a UI that is wider and chat-simile but still resembles a pokedex, add then graph visualizer on the side if requests.
+#### work in progress
   * keep the queries on the page route so, in the future - if starts_with "/query=" and ends_with "=NEW", generate a new query, while if it ends_with "a random 4 digit code": access the database for that query. This is to be able to obtain a share link with other people.
