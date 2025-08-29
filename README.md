@@ -10,7 +10,7 @@ It's a work in progress, so everything can change, from the UI to the core featu
 ## DEMO
 Working on a video demonstration of the current features of the app.
 
-## Limitations
+## Current relations
 Still limited to the first generation and on the current relationships:
 * `BELONGS_TO` -> node `Generation`
 * `BELONGS_TO` -> node `Category`:`Legendary`
@@ -23,6 +23,10 @@ Still limited to the first generation and on the current relationships:
 * `SAME_GENERATION`
 * `EVOLVES_TO`
 * `EVOLVES_FROM`
+* `BELONGS_TO_GEN`
+* `WEAK_TO`
+* `RESISTENT_TO`
+* `IMMUNE_TO`
 
 # COME AVVIARE
 apri il terminale
@@ -90,6 +94,7 @@ The following are edits that can be done at the same time, changing the flow of 
 * Extract information directly from the query, to understand what the user is asking and plot the right graph (Take pokemon names, types, relationships etc)
 * Extract information from the rag output, building a graph in any case
 * Change the workflow of the application, from deciding if perform rag or cypher rag to perform both with graph traversal
+* Add a graph traversal algorithm like PPR (how to personalize weights?) to reach linked nodes and enlarge the information extracted.
 ##### How to do it
 Let the model do a cypher query outputting a list of names/types and then visualize graphs with additional functions.
 * visualize a graph based on the pokemon listed in the output, to do so analyze the values of the keys
