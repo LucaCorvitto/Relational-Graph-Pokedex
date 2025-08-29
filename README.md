@@ -12,21 +12,20 @@ Working on a video demonstration of the current features of the app.
 
 ## Current relations
 Still limited to the first generation and on the current relationships:
-* `BELONGS_TO` -> node `Generation`
 * `BELONGS_TO` -> node `Category`:`Legendary`
 * `BELONGS_TO` -> node `Category`:`Starter`
 * `BELONGS_TO` -> node `Category`:`Fossil`
 * `BELONGS_TO` -> node `Category`:`Mythical`
 * `SHARE_CATEGORY` (no additional info on the specific category)
-* `HAS_TYPE`
-* `SAME_TYPE`
-* `SAME_GENERATION`
-* `EVOLVES_TO`
-* `EVOLVES_FROM`
-* `BELONGS_TO_GEN`
-* `WEAK_TO`
-* `RESISTENT_TO`
-* `IMMUNE_TO`
+* `HAS_TYPE` -> node `Type: <type>`
+* `SAME_TYPE` -> node `Pokémon: <name>` (label specific type)
+* `SAME_GENERATION` -> node `Pokémon: <name>`
+* `EVOLVES_TO` -> node `Pokémon: <name>`
+* `EVOLVES_FROM` -> node `Pokémon: <name>`
+* `BELONGS_TO_GEN` -> node `Generation: <gen>`
+* `WEAK_TO` -> node `Type: <type>`
+* `RESISTENT_TO` -> node `Type: <type>`
+* `IMMUNE_TO` -> node `Type: <type>`
 
 # COME AVVIARE
 apri il terminale
