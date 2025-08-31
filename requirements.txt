@@ -1,11 +1,14 @@
 langchain-openai
+langchain_ollama
 uvicorn
 langchain-pinecone
 pinecone
 neo4j
+neo4j-graphrag[ollama,pinecone]
 langchain
 langgraph
 pydantic
 requests
 fastapi
 flet
+ipykernel
