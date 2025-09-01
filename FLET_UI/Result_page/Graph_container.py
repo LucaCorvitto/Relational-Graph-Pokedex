@@ -145,18 +145,36 @@ class GraphDrawing(ft.Container):
         )
 
 
+
 # --- Flet entrypoint ---
 def main(page: ft.Page):
+    # nodes = [
+    #     {"id": 1, "label": "Pichu", "group": "Pokemon"},
+    #     {"id": 2, "label": "Pikachu", "group": "Pokemon"},
+    #     {"id": 3, "label": "Raichu", "group": "Pokemon"},
+    #     {"id": 4, "label": "Electric", "group": "Type"},
+    # ]
     nodes = [
-        {"id": 1, "label": "Pichu", "group": "Pokemon"},
-        {"id": 2, "label": "Pikachu", "group": "Pokemon"},
-        {"id": 3, "label": "Raichu", "group": "Pokemon"},
-        {"id": 4, "label": "Electric", "group": "Type"},
-    ]
+        {'id': 91, 'label': 'Gastly', 'group': 'Pokemon'},
+        {'id': 92, 'label': 'Haunter', 'group': 'Pokemon'}, 
+        {'id': 93, 'label': 'Gengar', 'group': 'Pokemon'}
+        ]
+    # edges = [
+    #     {"from": 2, "to": 4, "label": "HAS_TYPE"},
+    #     {"from": 1, "to": 2, "label": "EVOLVES_FROM"},
+    #     {"from": 2, "to": 3, "label": "EVOLVES_TO"},
+    # ]
     edges = [
-        {"from": 2, "to": 4, "label": "HAS_TYPE"},
-        {"from": 1, "to": 2, "label": "EVOLVES_FROM"},
-        {"from": 2, "to": 3, "label": "EVOLVES_TO"},
+        {'from': 91, 'to': 92, 'label': 'EVOLVES_TO'}, 
+        {'from': 92, 'to': 91, 'label': 'EVOLVES_FROM'}, 
+        {'from': 91, 'to': 92, 'label': 'SHARE_TYPE'}, 
+        {'from': 91, 'to': 92, 'label': 'SAME_GENERATION'}, 
+        {'from': 91, 'to': 93, 'label': 'SHARE_TYPE'}, 
+        {'from': 91, 'to': 93, 'label': 'SAME_GENERATION'}, 
+        {'from': 92, 'to': 93, 'label': 'EVOLVES_TO'}, 
+        {'from': 93, 'to': 92, 'label': 'EVOLVES_FROM'}, 
+        {'from': 92, 'to': 93, 'label': 'SHARE_TYPE'}, 
+        {'from': 92, 'to': 93, 'label': 'SAME_GENERATION'}
     ]
 
     graph = GraphDrawing(nodes, edges)
