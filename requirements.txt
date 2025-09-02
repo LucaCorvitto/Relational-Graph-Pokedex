@@ -5,6 +5,7 @@ langchain-pinecone
 pinecone
 neo4j
 neo4j-graphrag[ollama,pinecone]
+pandas
 langchain
 langgraph
 pydantic

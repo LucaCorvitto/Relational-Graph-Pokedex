@@ -85,8 +85,10 @@ RETURN p1.name, p2.name
 * Update the DataBase enhancing the information extraction from the websites including also:
   * Pokedex entry relative to their generation (or every gen)
   * General information (height, weight, etc)
-  * Game Stats (Atk, Def, SpAtk, SpDef...)
+  * Including abilities can lead to having to create other links like SHARE_ABILITY
+  * Game Stats (Atk, Def, SpAtk, SpDef...) (forse troppo meta)
   * Game locations (idk)
+  #### done
   * General info and additional effects sections of Type nodes e.g. look [here](https://bulbapedia.bulbagarden.net/wiki/Fire_(type))
   * General info and terminology sections for category nodes, pay attention that starter -> [first partner pokemon](https://bulbapedia.bulbagarden.net/wiki/First_partner_Pok%C3%A9mon), and that fossil is just fossil (not fossil pokemon)
 #### LangGraph Process
