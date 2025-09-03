@@ -92,14 +92,14 @@ RETURN p1.name, p2.name
   * General info and additional effects sections of Type nodes e.g. look [here](https://bulbapedia.bulbagarden.net/wiki/Fire_(type))
   * General info and terminology sections for category nodes, pay attention that starter -> [first partner pokemon](https://bulbapedia.bulbagarden.net/wiki/First_partner_Pok%C3%A9mon), and that fossil is just fossil (not fossil pokemon)
 #### LangGraph Process
-**IMPORTANT**: edit `pokemon_parser.py` to give the same unique id to pinecone instances and neo4j nodes (for that extract info for type and category nodes too); then install (`pip install neo4j-graphrag[ollama,pinecone]`) and use [neo4j-graphrag](https://neo4j.com/docs/neo4j-graphrag-python/current/) to perform easily both simple [vectorsearch](https://neo4j.com/blog/developer/get-started-graphrag-python-package/) and [vectorcyphersearch](https://neo4j.com/blog/developer/graph-traversal-graphrag-python-package/), check how [hybridsearch](https://neo4j.com/blog/developer/hybrid-retrieval-graphrag-python-package/) could be performed if useful.
+**IMPORTANT**: edit `pokemon_parser.py` to give the same unique id to pinecone instances and neo4j nodes (for that extract info for type and category nodes too); (this should be done!) then install (`pip install neo4j-graphrag[ollama,pinecone]`) and use [neo4j-graphrag](https://neo4j.com/docs/neo4j-graphrag-python/current/) to perform easily both simple [vectorsearch](https://neo4j.com/blog/developer/get-started-graphrag-python-package/) and [vectorcyphersearch](https://neo4j.com/blog/developer/graph-traversal-graphrag-python-package/), check how [hybridsearch](https://neo4j.com/blog/developer/hybrid-retrieval-graphrag-python-package/) could be performed if useful.
 Check `neo4j_graphrag_pipeline.ipynb` to see how to implement vectorcyphersearch.
 
 The following are edits that can be done at the same time, changing the flow of the app with rag-cypherRag-graphTraversal. The graphTraversal phase is done to enlarge the context, and can be exploited to retrieve more and tailored information for the graph visualization. Extracting info from the query could be interesting:
 * Add Graph Visualization for every request, update and create new graph building functions
 * Extract information directly from the query, to understand what the user is asking and plot the right graph (Take pokemon names, types, relationships etc)
 * Extract information from the rag output, building a graph in any case
-* Change the workflow of the application, from deciding if perform rag or cypher rag to perform both with graph traversal
+* Change the workflow of the application, from deciding if perform rag or cypher rag to perform both with graph traversal (vectorcyphersearch perform simple retrieving + additional metadata/linked nodes requested, it should be similar, or even better, than graph traversal for our task)
 * Add a graph traversal algorithm like PPR (how to personalize weights?) to reach linked nodes and enlarge the information extracted.
 ##### How to do it
 Let the model do a cypher query outputting a list of names/types and then visualize graphs with additional functions.
