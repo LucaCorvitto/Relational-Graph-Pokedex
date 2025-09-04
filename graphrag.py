@@ -39,7 +39,7 @@ from utils import initialization
 # finding matches with even non-ghost type pokemon if the text content contains similar words
 # we then could use the cypher query to extract linked nodes like types, categories or generation
 # I am not sure if we could extract even links within the extracted nodes
-# The problem here is that the BASE results are extracte via vector search (simple retrieving)
+# The problem here is that the BASE results are extracted via vector search (simple retrieving)
 # thus reducing the accuracy of the extracted info and making more difficult to know how many matches we have to collect
 
 # So, we should keep doing as we are currently doing, maybe using VectorCypherSearch in the place of simple VectorSearch
@@ -56,7 +56,7 @@ from utils import initialization
 # Important question: when do we need simple retrieval? In this case use VectorCypherSearch (or vector + external func cypher)
 # e.g. "Which is the strongest pokemon?" -> this question is too general to perform a simple cypher search
 # "Tell me who is the best pokemon" -> too many interpretations, best in terms of? Check if it could be 
-# smart to make the llm ask for more specifi details to the user, or just simply answering
+# smart to make the llm ask for more specific details to the user, or just simply answering
 # ...
 
 

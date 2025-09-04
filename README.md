@@ -82,6 +82,13 @@ WHERE r.type = ["Electric"]
 RETURN p1.name, p2.name
 ```
 ##### not done
+* Update the Knowledge Graph adding new relationships between Types:
+  * `WEAK_TO`
+  * `RESISTENT_TO`
+  * `IMMUNE_TO`
+  * `SUPER_EFFECTIVE_TO` (give this to pokemon too after a check if at least one of the type is super effective to one of the two types of the other pokemon and is not weak or immune to the other type)
+Extract these info from the type effectiveness table.
+
 * Update the DataBase enhancing the information extraction from the websites including also:
   * Pokedex entry relative to their generation (or every gen)
   * General information (height, weight, etc)
@@ -92,7 +99,7 @@ RETURN p1.name, p2.name
   * General info and additional effects sections of Type nodes e.g. look [here](https://bulbapedia.bulbagarden.net/wiki/Fire_(type))
   * General info and terminology sections for category nodes, pay attention that starter -> [first partner pokemon](https://bulbapedia.bulbagarden.net/wiki/First_partner_Pok%C3%A9mon), and that fossil is just fossil (not fossil pokemon)
 #### LangGraph Process
-**IMPORTANT**: edit `pokemon_parser.py` to give the same unique id to pinecone instances and neo4j nodes (for that extract info for type and category nodes too); (this should be done!) then install (`pip install neo4j-graphrag[ollama,pinecone]`) and use [neo4j-graphrag](https://neo4j.com/docs/neo4j-graphrag-python/current/) to perform easily both simple [vectorsearch](https://neo4j.com/blog/developer/get-started-graphrag-python-package/) and [vectorcyphersearch](https://neo4j.com/blog/developer/graph-traversal-graphrag-python-package/), check how [hybridsearch](https://neo4j.com/blog/developer/hybrid-retrieval-graphrag-python-package/) could be performed if useful.
+**IMPORTANT**: check how [hybridsearch](https://neo4j.com/blog/developer/hybrid-retrieval-graphrag-python-package/) could be performed if useful.
 Check `neo4j_graphrag_pipeline.ipynb` to see how to implement vectorcyphersearch.
 
 The following are edits that can be done at the same time, changing the flow of the app with rag-cypherRag-graphTraversal. The graphTraversal phase is done to enlarge the context, and can be exploited to retrieve more and tailored information for the graph visualization. Extracting info from the query could be interesting:
@@ -101,12 +108,37 @@ The following are edits that can be done at the same time, changing the flow of 
 * Extract information from the rag output, building a graph in any case
 * Change the workflow of the application, from deciding if perform rag or cypher rag to perform both with graph traversal (vectorcyphersearch perform simple retrieving + additional metadata/linked nodes requested, it should be similar, or even better, than graph traversal for our task)
 * Add a graph traversal algorithm like PPR (how to personalize weights?) to reach linked nodes and enlarge the information extracted.
+
 ##### How to do it
-Let the model do a cypher query outputting a list of names/types and then visualize graphs with additional functions.
-* visualize a graph based on the pokemon listed in the output, to do so analyze the values of the keys
-  * if value is a pokemon name visualize the graph of the pokemon name and links (choose how many)
-  * if value is a type name ?
-  * if value is ?
+**Notice**: we are going to take a different approach:
+Noting that:
+* We need to perform exact cypher search to retrieve exact information when asking about specific info like:
+  * exact Type/Pokemon/other relation
+  * count
+* We still need to perform vector search for more general questions like:
+  * Which is the strongest pokemon?
+  * Tell me who is the best pokemon in terms of breeding
+
+We should keep the distinction between answering with a cypher search and a vector search, but we are going to enrich the context in bot cases, following these steps:
+* Perform retrieval/search to extract all the needed info and visualize the pokemon/dex cards 
+* Pass that info to the llm to produce a satisfying response
+(check if it's possible to do it in parallel, otherwise collect the llm response and visualize it (writing it down progressively) while proceeding with the next process)
+* call other cypher queries to collect info for the graph visualization
+
+The difference between general and specific questions will lies in the first step:
+* Specific question: cypher search with extraction of all linked metadata
+* General question: vector search with cypher extraction of all linked metadata (located the nodes with vector search we can access to their metadata, check if it's possible to do so with simple neo4j graphrag vector search)
+
+To visualize a graph (and pokemon/dex cards) even when no output nodes are required (e.g. a count) we will let the model do a different cypher query outputting a list of nodes and then visualize graphs with additional functions.
+To visualize a graph based on the nodes listed in the output, we have to check the values of the keys:
+  * if value is a pokemon visualize the graph of the pokemon and links (choose how many, like a top-k)
+  * if value is a type visualize links between the types
+  * if value is a category visualize all the pokemon that belongs to that category (links)
+e.g. query is "How many fire type pokemon are there?":
+* classic output is count(pokemon with fire type in types) OR count(pokemon nodes linked to fire type node)
+* we edit the cypher query (or create another one) to output `pokemon with fire type in types` OR `pokemon nodes linked to fire type node` and then perform count on the list
+* alternatively we analyze the query and perform another cypher query based on result of the analysis (fire type found, search for Fire type and its links)
+
 
 ### UI
 * Update the UI and UX, from just a pokedex to a richer interface, older IDEAS:
